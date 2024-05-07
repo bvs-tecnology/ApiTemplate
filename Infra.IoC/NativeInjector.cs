@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Application;
+using Domain.SeedWork.Notification;
 using Infra.Data;
 using Infra.Utils.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +14,15 @@ namespace Infra.IoC
     {
         public static void AddLocalHttpClients(this IServiceCollection services, IConfiguration configuration) {}
 
-        public static void AddLocalServices(this IServiceCollection services, IConfiguration configuration) {}
+        public static void AddLocalServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            #region Services
+            services.AddHttpContextAccessor();
+            services.AddScoped<INotification, Notification>();
+            services.AddScoped<ITestService, TestService>();
+            services.AddSingleton<IContainer, ServiceProviderProxy>();
+            #endregion
+        }
 
         public static void AddLocalUnitOfWork(this IServiceCollection services, IConfiguration configuration)
         {

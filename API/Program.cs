@@ -1,5 +1,6 @@
 using API.HealthCheck;
 using API.Middlewares;
+using Domain.SeedWork.Notification;
 using HealthChecks.UI.Client;
 using Infra.IoC;
 using Infra.Utils.Configuration;
@@ -69,6 +70,7 @@ builder.Services.AddAuthentication(x =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+ServiceLocator.Initialize(app.Services.GetRequiredService<IContainer>());
 app.UseRouting();
 app.UseCors("AllowAllOrigins");
 app.UseAuthorization();

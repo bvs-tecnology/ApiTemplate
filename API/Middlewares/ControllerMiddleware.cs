@@ -1,4 +1,7 @@
 ﻿using System.Net;
+using Domain.Common;
+using Domain.Exceptions;
+using Domain.SeedWork.Notification;
 using Infra.Utils.Constants;
 using Newtonsoft.Json;
 
@@ -6,11 +9,16 @@ namespace API.Middlewares
 {
     public class ControllerMiddleware(RequestDelegate next)
     {
-        public async Task Invoke(HttpContext context)
+        private static readonly bool IsDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+        public async Task Invoke(HttpContext context, INotification notification)
         {
             try
             {
                 await next(context);
+            }
+            catch (NotificationException)
+            {
+                await HandleNotificationExceptionAsync(context, notification.Notifications);
             }
             catch (Exception ex)
             {
@@ -18,14 +26,22 @@ namespace API.Middlewares
             }
         }
 
+        private static Task HandleNotificationExceptionAsync(HttpContext context, List<NotificationModel> notifications)
+        {
+            var result = new GenericResponse();
+            notifications.ForEach(x => result.AddError(x.Message));
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            return context.Response.WriteAsync(JsonConvert.SerializeObject(result));
+        }
+
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var result = JsonConvert.SerializeObject(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" ?
-                new { error = exception.Message } :
-                new { error = RequestErrorResponseConstant.InternalError });
+            var result = new GenericResponse();
+            result.AddError(IsDevelopment ? exception.Message : RequestErrorResponseConstant.InternalError);
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            return context.Response.WriteAsync(result);
+            return context.Response.WriteAsync(JsonConvert.SerializeObject(result));
         }
     }
 }
