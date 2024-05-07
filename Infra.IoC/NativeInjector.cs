@@ -19,7 +19,6 @@ namespace Infra.IoC
             #region Services
             services.AddHttpContextAccessor();
             services.AddScoped<INotification, Notification>();
-            services.AddScoped<ITestService, TestService>();
             services.AddSingleton<IContainer, ServiceProviderProxy>();
             #endregion
         }
