@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infra.Data
+namespace Infra.Data.Repository
 {
     [ExcludeFromCodeCoverage]
     public class BaseRepository<TEntity>(IUnitOfWork unitOfWork) : IBaseRepository<TEntity> where TEntity : class
@@ -15,7 +15,7 @@ namespace Infra.Data
 
         public IQueryable<TEntity> Get(Expression<Func<TEntity, bool>> expression) => GetAll().Where(expression);
 
-        public virtual async Task<TEntity?> GetByIDAsync(object id)
+        public virtual async Task<TEntity?> GetByIDAsync(Guid id)
         {
             return await unitOfWork.Context.Set<TEntity>().FindAsync(id);
         }
@@ -31,7 +31,7 @@ namespace Infra.Data
             await unitOfWork.Context.Set<TEntity>().AddAsync(entity);
         }
 
-        public virtual async Task DeleteAsync(object id)
+        public virtual async Task DeleteAsync(Guid id)
         {
             TEntity? entityToDelete = await unitOfWork.Context.Set<TEntity>().FindAsync(id);
             await DeleteAsync(entityToDelete!);

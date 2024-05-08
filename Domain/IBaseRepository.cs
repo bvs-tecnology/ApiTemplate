@@ -10,13 +10,13 @@ namespace Domain
         Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> expression);
         Task<IEnumerable<TEntity>> GetNoTrackingAsync(Expression<Func<TEntity, bool>> expression);
 
-        Task<TEntity?> GetByIDAsync(object id);
+        Task<TEntity?> GetByIDAsync(Guid id);
 
         Task InsertWithSaveChangesAsync(TEntity entity);
 
         Task InsertAsync(TEntity entity);
 
-        Task DeleteAsync(object id);
+        Task DeleteAsync(Guid id);
 
         Task DeleteAsync(TEntity entity);
 

@@ -28,7 +28,7 @@ namespace API.Middlewares
 
         private static Task HandleNotificationExceptionAsync(HttpContext context, List<NotificationModel> notifications)
         {
-            var result = new GenericResponse();
+            var result = new GenericResponse<object>(null);
             notifications.ForEach(x => result.AddError(x.Message));
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
@@ -37,7 +37,7 @@ namespace API.Middlewares
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var result = new GenericResponse();
+            var result = new GenericResponse<object>(null);
             result.AddError(IsDevelopment ? exception.Message : RequestErrorResponseConstant.InternalError);
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

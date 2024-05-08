@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using API.HealthCheck;
 using API.Middlewares;
 using Domain.SeedWork.Notification;
@@ -13,7 +14,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(x =>
+    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
+);
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("App:Settings"));
 builder.Services.AddSwaggerGen(c =>
 {
