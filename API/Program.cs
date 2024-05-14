@@ -1,12 +1,9 @@
 using System.Text.Json.Serialization;
-using API.HealthCheck;
 using API.Middlewares;
 using Domain.SeedWork.Notification;
-using HealthChecks.UI.Client;
 using Infra.IoC;
 using Infra.Utils.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.IdentityModel.Tokens;
 
@@ -41,7 +38,6 @@ builder.Services.AddLocalUnitOfWork(builder.Configuration);
 #endregion
 
 builder.Services.AddOptions();
-builder.Services.AddHealthCheckServices(builder.Configuration);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", builder =>
@@ -84,21 +80,5 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseMiddleware<ControllerMiddleware>();
-
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHealthChecks("/healthcheck", new HealthCheckOptions
-    {
-        Predicate = _ => true,
-        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-    });
-    endpoints.MapHealthChecks("/health/startup");
-    endpoints.MapHealthChecks("/healthz", new HealthCheckOptions
-    {
-        Predicate = _ => false
-    });
-    endpoints.MapControllers();
-});
-app.UseRewriter(new RewriteOptions().AddRedirect(@"^(?![\s\S])", "healthcheck"));
 
 app.Run();
