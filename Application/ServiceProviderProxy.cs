@@ -7,7 +7,7 @@ namespace Application
     {
         public T GetService<T>()
         {
-           return (T)httpContextAccessor.HttpContext.RequestServices.GetService(typeof(T));
+           return (T)httpContextAccessor.HttpContext.RequestServices.GetService(typeof(T))!;
         }
     }
 }
