@@ -84,21 +84,6 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseMiddleware<ControllerMiddleware>();
-
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHealthChecks("/healthcheck", new HealthCheckOptions
-    {
-        Predicate = _ => true,
-        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-    });
-    endpoints.MapHealthChecks("/health/startup");
-    endpoints.MapHealthChecks("/healthz", new HealthCheckOptions
-    {
-        Predicate = _ => false
-    });
-    endpoints.MapControllers();
-});
 app.UseRewriter(new RewriteOptions().AddRedirect(@"^(?![\s\S])", "healthcheck"));
 
 app.Run();
