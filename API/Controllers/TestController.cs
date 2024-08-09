@@ -19,7 +19,7 @@ namespace API.Controllers
         }
 
         [HttpGet("400")]
-        [SwaggerOperation(Summary = "Returns not allowed exception")]
+        [SwaggerOperation(Summary = "Returns bad request")]
         [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public IActionResult GetBadRequest()
@@ -28,13 +28,13 @@ namespace API.Controllers
             throw new NotificationException();
         }
 
-        [HttpPost("200")]
-        [SwaggerOperation(Summary = "Returns not allowed exception")]
-        [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status200OK)]
+        [HttpGet("200")]
+        [SwaggerOperation(Summary = "Returns OK")]
+        [ProducesResponseType(typeof(BaseResponse<UserDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public IActionResult Post([FromBody] UserDto request)
+        public IActionResult Get()
         {
-            return Ok(new GenericResponse<UserDto>(request));
+            return Ok(new GenericResponse<UserDto>(user));
         }
     }
 }
