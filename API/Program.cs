@@ -5,6 +5,7 @@ using Infra.IoC;
 using Infra.Utils.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,11 @@ builder.Services.AddLocalHttpClients(builder.Configuration);
 builder.Services.AddLocalUnitOfWork(builder.Configuration);
 #endregion
 
+builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
+    loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration)
+);
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddOptions();
 builder.Services.AddCors(options =>
 {
@@ -75,4 +81,17 @@ app.UseSwaggerUI(c =>
 
 app.UseMiddleware<ControllerMiddleware>();
 
-app.Run();
+try
+{
+    Log.Information("Starting the application...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application failed to start");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
+
