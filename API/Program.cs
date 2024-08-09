@@ -4,16 +4,13 @@ using Domain.SeedWork.Notification;
 using Infra.IoC;
 using Infra.Utils.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers().AddJsonOptions(x =>
-    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
-);
+builder.Services.AddControllers()
+    .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("App:Settings"));
 builder.Services.AddSwaggerGen(c =>
 {
@@ -24,10 +21,7 @@ builder.Services.AddSwaggerGen(c =>
             Title = "Template API",
             Version = "0.0.1",
             Description = "Template de API responsavel pelo dominio Air Finder",
-            Contact = new Microsoft.OpenApi.Models.OpenApiContact
-            {
-                Name = "Air Finder"
-            }
+            Contact = new Microsoft.OpenApi.Models.OpenApiContact { Name = "Air Finder" }
         });
 });
 
@@ -37,6 +31,11 @@ builder.Services.AddLocalHttpClients(builder.Configuration);
 builder.Services.AddLocalUnitOfWork(builder.Configuration);
 #endregion
 
+builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
+    loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration)
+);
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddOptions();
 builder.Services.AddCors(options =>
 {
@@ -70,6 +69,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 ServiceLocator.Initialize(app.Services.GetRequiredService<IContainer>());
+app.MapControllers();
 app.UseRouting();
 app.UseCors("AllowAllOrigins");
 app.UseAuthorization();
@@ -81,4 +81,17 @@ app.UseSwaggerUI(c =>
 
 app.UseMiddleware<ControllerMiddleware>();
 
-app.Run();
+try
+{
+    Log.Information("Starting the application...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application failed to start");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
+
