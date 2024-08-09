@@ -2,6 +2,7 @@
 using Application;
 using Domain.SeedWork.Notification;
 using Infra.Data;
+using Infra.Data.Repository;
 using Infra.Utils.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,9 +18,11 @@ namespace Infra.IoC
         public static void AddLocalServices(this IServiceCollection services, IConfiguration configuration)
         {
             #region Services
-            services.AddHttpContextAccessor();
             services.AddScoped<INotification, Notification>();
             services.AddSingleton<IContainer, ServiceProviderProxy>();
+            #endregion
+
+            #region Repositories
             #endregion
         }
 
