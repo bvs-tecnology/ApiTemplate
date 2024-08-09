@@ -4,16 +4,12 @@ using Domain.SeedWork.Notification;
 using Infra.IoC;
 using Infra.Utils.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers().AddJsonOptions(x =>
-    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
-);
+builder.Services.AddControllers()
+    .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("App:Settings"));
 builder.Services.AddSwaggerGen(c =>
 {
@@ -24,10 +20,7 @@ builder.Services.AddSwaggerGen(c =>
             Title = "Template API",
             Version = "0.0.1",
             Description = "Template de API responsavel pelo dominio Air Finder",
-            Contact = new Microsoft.OpenApi.Models.OpenApiContact
-            {
-                Name = "Air Finder"
-            }
+            Contact = new Microsoft.OpenApi.Models.OpenApiContact { Name = "Air Finder" }
         });
 });
 
@@ -70,6 +63,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 ServiceLocator.Initialize(app.Services.GetRequiredService<IContainer>());
+app.MapControllers();
 app.UseRouting();
 app.UseCors("AllowAllOrigins");
 app.UseAuthorization();
