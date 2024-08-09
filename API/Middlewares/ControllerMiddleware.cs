@@ -4,7 +4,6 @@ using Domain.Exceptions;
 using Domain.SeedWork.Notification;
 using Infra.Utils.Constants;
 using Newtonsoft.Json;
-using Serilog.Context;
 using static System.String;
 
 namespace API.Middlewares
@@ -22,6 +21,10 @@ namespace API.Middlewares
             catch (NotificationException)
             {
                 await HandleNotificationExceptionAsync(context, notification.Notifications);
+            }
+            catch (NotAllowedException)
+            {
+                await HandleNotAllowedException(context);
             }
             catch (Exception ex)
             {
@@ -57,7 +60,7 @@ namespace API.Middlewares
 
         private Task HandleNotificationExceptionAsync(HttpContext context, List<NotificationModel> notifications)
         {
-            var result = new GenericResponse<object>(null);
+            var result = new GenericResponse<object>();
             notifications.ForEach(x => result.AddError(x.Message));
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
@@ -68,10 +71,21 @@ namespace API.Middlewares
 
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var result = new GenericResponse<object>(null);
+            var result = new GenericResponse<object>();
             result.AddError(IsDevelopment ? exception.Message : RequestErrorResponseConstant.InternalError);
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            LogError(context);
+            return context.Response.WriteAsync(JsonConvert.SerializeObject(result));
+        }
+
+        private Task HandleNotAllowedException(HttpContext context)
+        {
+            var result = new GenericResponse<object>();
+            result.AddError(RequestErrorResponseConstant.NotAllowed);
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.MethodNotAllowed;
 
             LogError(context);
             return context.Response.WriteAsync(JsonConvert.SerializeObject(result));
