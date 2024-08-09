@@ -5,9 +5,6 @@ namespace Application
 {
     public class ServiceProviderProxy(IHttpContextAccessor httpContextAccessor) : IContainer
     {
-        public T GetService<T>()
-        {
-           return (T)httpContextAccessor.HttpContext.RequestServices.GetService(typeof(T))!;
-        }
+        public T GetService<T>() => (T)httpContextAccessor.HttpContext.RequestServices.GetService(typeof(T))!;
     }
 }

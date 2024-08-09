@@ -1,5 +1,4 @@
-﻿using Application;
-using Domain.Common;
+﻿using Domain.Common;
 using Domain.Exceptions;
 using Domain.SeedWork.Notification;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers
 {
-    public class TesteController() : BaseController
+    public class TestController() : BaseController
     {
         [HttpPost]
         [SwaggerOperation(Summary = "Test of a post endpoint")]
