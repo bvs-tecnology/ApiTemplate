@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Entities.Dtos;
 using Domain.Exceptions;
 using Domain.SeedWork.Notification;
 using Microsoft.AspNetCore.Mvc;
@@ -27,13 +28,13 @@ namespace API.Controllers
             throw new NotificationException();
         }
 
-        [HttpGet("200")]
+        [HttpPost("200")]
         [SwaggerOperation(Summary = "Returns not allowed exception")]
         [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public IActionResult Get()
+        public IActionResult Post([FromBody] UserDto request)
         {
-            return Ok(new GenericResponse<object>());
+            return Ok(new GenericResponse<UserDto>(request));
         }
     }
 }
