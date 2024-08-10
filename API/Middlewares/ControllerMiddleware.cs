@@ -3,7 +3,6 @@ using System.Text;
 using Domain.Common;
 using Domain.Exceptions;
 using Domain.SeedWork.Notification;
-using Infra.Data;
 using Infra.Utils.Constants;
 using Newtonsoft.Json;
 using static System.String;
