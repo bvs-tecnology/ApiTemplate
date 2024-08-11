@@ -29,9 +29,5 @@ COPY --from=build /app/publish .
 # Expor portas necessárias
 EXPOSE 8080
 
-# Configurar variáveis de ambiente para comunicação com o Seq
-ENV SEQ_URL=http://host.docker.internal:5341
-ENV ASPNETCORE_ENVIRONMENT=Production
-
 # Definir o comando de entrada
 ENTRYPOINT ["dotnet", "API.dll"]  # Ajuste o nome do DLL aqui se necessário
