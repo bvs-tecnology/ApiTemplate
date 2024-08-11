@@ -27,9 +27,7 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Expor portas necessárias
-EXPOSE 80
-EXPOSE 443
-EXPOSE 8081
+EXPOSE 8080
 
 # Definir o comando de entrada
 ENTRYPOINT ["dotnet", "API.dll"]  # Ajuste o nome do DLL aqui se necessário
