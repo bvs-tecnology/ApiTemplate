@@ -2,6 +2,6 @@
 
 public static class JwtClaims
 {
-    public const string CAIM_USER_PROFILE = "profile";
-    public const string CLAIM_SCOPES = "scopes";
+    public const string ClaimUserProfile = "profile";
+    public const string ClaimScopes = "scopes";
 }

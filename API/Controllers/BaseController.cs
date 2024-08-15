@@ -10,8 +10,8 @@ namespace API.Controllers;
 [Authorize]
 public abstract class BaseController : Controller
 {
-    protected UserDto? user => GetType<UserDto>(JwtClaims.CAIM_USER_PROFILE);
-    protected IEnumerable<string>? scopes => GetType<IEnumerable<string>>(JwtClaims.CLAIM_SCOPES);
+    protected UserDto? user => GetType<UserDto>(JwtClaims.ClaimUserProfile);
+    protected IEnumerable<string>? scopes => GetType<IEnumerable<string>>(JwtClaims.ClaimScopes);
 
     #region Private Methods
 

@@ -12,6 +12,11 @@ namespace Infra.Security;
 public class JwtService(IOptionsSnapshot<AppSettings> appSettings) : IJwtService
 {
     private readonly AppSettings _appSettings = appSettings.Value;
+    private static JsonSerializerOptions jsonOptions
+        => new() {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
 
     public string CreateToken(UserDto user)
     {
@@ -39,14 +44,8 @@ public class JwtService(IOptionsSnapshot<AppSettings> appSettings) : IJwtService
     private static ClaimsIdentity GetClaims(UserDto user)
     {
         var identity = new ClaimsIdentity("JWT");
-        var serializeOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = true
-        };
-
-        identity.AddClaim(new Claim(JwtClaims.CAIM_USER_PROFILE, JsonSerializer.Serialize(user, serializeOptions)));
-        identity.AddClaim(new Claim(JwtClaims.CLAIM_SCOPES, user.Role.ToString()));
+        identity.AddClaim(new Claim(JwtClaims.ClaimUserProfile, JsonSerializer.Serialize(user, jsonOptions)));
+        identity.AddClaim(new Claim(JwtClaims.ClaimScopes, user.Role.ToString()));
         return identity;
     }
 }
