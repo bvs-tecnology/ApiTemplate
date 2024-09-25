@@ -14,11 +14,9 @@ public abstract class BaseController : Controller
     protected IEnumerable<string>? scopes => GetType<IEnumerable<string>>(JwtClaims.ClaimScopes);
 
     #region Private Methods
-
     private string authToken => HttpContext.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
     private JwtSecurityToken token => new JwtSecurityTokenHandler().ReadJwtToken(authToken);
     private static JsonSerializerOptions? serializeOptions => new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true };
     private T? GetType<T>(string type) => JsonSerializer.Deserialize<T>(token.Claims.FirstOrDefault(x => x.Type == type)!.Value, serializeOptions);
-
     #endregion
 }

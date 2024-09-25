@@ -2,7 +2,6 @@
 using Application;
 using Domain.SeedWork.Notification;
 using Infra.Data;
-using Infra.Data.Repository;
 using Infra.Utils.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,6 +30,15 @@ namespace Infra.IoC
             var connString = Builders.BuildConnectionString(configuration);
             services.AddDbContext<Context>(options => options.UseLazyLoadingProxies().UseSqlServer(connString));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+        }
+
+        public static void AddLocalHealthChecks(this IServiceCollection services, IConfiguration configuration)
+        {
+            var connString = Builders.BuildConnectionString(configuration);
+            var cacheConnString = configuration["App:Settings:Cache"]!;
+            services.AddHealthChecks()
+                .AddSqlServer(connString)
+                .AddRedis(cacheConnString);
         }
     }
 }

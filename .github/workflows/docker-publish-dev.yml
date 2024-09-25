@@ -16,6 +16,7 @@ jobs:
           files: '${{ github.workspace }}/API/appsettings.json'
         env:
           App.Settings.ConnectionString: ${{ secrets.CONNECTION_STRING }}
+          App.Settings.Cache: ${{ secrets.REDIS_CONNECTION_STRING }}
           App.Settings.Jwt.Secret: ${{ secrets.JWT_SECRET }}
           Serilog.WriteTo: ${{ secrets.SEQ_WRITE }}
 

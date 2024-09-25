@@ -13,7 +13,7 @@ namespace Infra.Utils.Configuration
             {
                 PersistSecurityInfo = true,
                 MultipleActiveResultSets = true,
-                ConnectTimeout = 30
+                ConnectTimeout = 15
             };
             return sqlBuilder.ConnectionString;
         }

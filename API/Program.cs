@@ -1,9 +1,11 @@
 using System.Text.Json.Serialization;
 using API.Middlewares;
 using Domain.SeedWork.Notification;
+using HealthChecks.UI.Client;
 using Infra.IoC;
 using Infra.Utils.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
@@ -29,6 +31,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddLocalServices(builder.Configuration);
 builder.Services.AddLocalHttpClients(builder.Configuration);
 builder.Services.AddLocalUnitOfWork(builder.Configuration);
+builder.Services.AddLocalHealthChecks(builder.Configuration);
 #endregion
 
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
@@ -69,21 +72,23 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 ServiceLocator.Initialize(app.Services.GetRequiredService<IContainer>());
+app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
 app.MapControllers();
 app.UseRouting();
 app.UseCors("AllowAllOrigins");
 app.UseAuthorization();
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+
+if (app.Environment.IsDevelopment())
 {
-    c.SwaggerEndpoint("/swagger/0.0.1/swagger.json", "Template API");
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/0.0.1/swagger.json", "Template API"); });
+}
 
 app.UseMiddleware<ControllerMiddleware>();
 
 try
 {
-    Log.Information("Starting the application...");
+    Log.Information("[ApiTemplate] Starting the application...");
     app.Run();
 }
 catch (Exception ex)
@@ -92,6 +97,7 @@ catch (Exception ex)
 }
 finally
 {
+    Log.Information("[ApiTemplate] Finishing the application...");
     Log.CloseAndFlush();
 }
 
