@@ -3,9 +3,11 @@ using Application;
 using Domain.SeedWork.Notification;
 using Infra.Data;
 using Infra.Utils.Configuration;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Infra.IoC
 {
@@ -34,11 +36,9 @@ namespace Infra.IoC
 
         public static void AddLocalHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {
-            var connString = Builders.BuildConnectionString(configuration);
-            var cacheConnString = configuration["App:Settings:Cache"]!;
             services.AddHealthChecks()
-                .AddSqlServer(connString)
-                .AddRedis(cacheConnString);
+                .AddSqlServer(Builders.BuildConnectionString(configuration))
+                .AddRedis(configuration.GetConnectionString("Redis")!);
         }
     }
 }

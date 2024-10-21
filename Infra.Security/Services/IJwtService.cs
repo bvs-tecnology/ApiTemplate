@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Dtos;
 
-namespace Infra.Security;
+namespace Infra.Security.Services;
 
 public interface IJwtService
 {

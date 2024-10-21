@@ -13,11 +13,11 @@ namespace API.Middlewares
     {
         private static readonly bool IsDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
         private string _body = Empty;
-        public async Task Invoke(HttpContext context, INotification notification)
+        public async Task InvokeAsync(HttpContext context, INotification notification)
         {
             try
             {
-                _body = await GetBody(context.Request);
+                _body = NotAllowedBodyLogging(context) ? "***" : await GetBody(context.Request);
                 await next(context);
                 LogInformation(context);
             }
@@ -50,26 +50,27 @@ namespace API.Middlewares
             var result = new GenericResponse<object>();
             notifications.ForEach(x => result.AddError(x.Message));
             UpdateContext(context, HttpStatusCode.BadRequest);
-            LogError(context);
-            await context.Response.WriteAsync(JsonConvert.SerializeObject(result));
+            var stringResponse = JsonConvert.SerializeObject(result);
+            await context.Response.WriteAsync(stringResponse);
+            await LogError(context, stringResponse);
         }
-
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             var result = new GenericResponse<object>();
             result.AddError(IsDevelopment ? exception.Message : RequestErrorResponseConstant.InternalError);
             UpdateContext(context, HttpStatusCode.InternalServerError);
-            LogError(context);
-            await context.Response.WriteAsync(JsonConvert.SerializeObject(result));
+            var stringResponse = JsonConvert.SerializeObject(result);
+            await context.Response.WriteAsync(stringResponse);
+            await LogError(context, stringResponse, exception.Message);
         }
-
         private async Task HandleNotAllowedException(HttpContext context)
         {
             var result = new GenericResponse<object>();
             result.AddError(RequestErrorResponseConstant.NotAllowed);
             UpdateContext(context, HttpStatusCode.MethodNotAllowed);
-            LogError(context);
-            await context.Response.WriteAsync(JsonConvert.SerializeObject(result));
+            var stringResponse = JsonConvert.SerializeObject(result);
+            await context.Response.WriteAsync(stringResponse);
+            await LogError(context, stringResponse);
         }
         private static void UpdateContext(HttpContext context, HttpStatusCode code)
         {
@@ -79,17 +80,13 @@ namespace API.Middlewares
         #endregion
 
         #region LOGGING
-        private static string LogMessage => "Request {method} {url} returned HttpStatusCode {statusCode}";
-        private static string LogMessageQuery => LogMessage + "; QueryString: {queryString}";
-        private static string LogMessageBody => LogMessage + "; Body: {body}";
-
         private void LogInformation(HttpContext context)
         {
             switch (context.Request.Method)
             {
                 case "GET" when !IsNullOrEmpty(context.Request.QueryString.ToString()):
                     logger.LogInformation(
-                        LogMessageQuery,
+                        "Request {method} {url} returned {statusCode}; query: {queryString}",
                         context.Request.Method,
                         context.Request.Path.Value,
                         context.Response.StatusCode,
@@ -100,7 +97,7 @@ namespace API.Middlewares
                 case "PUT":
                 case "PATCH":
                     logger.LogInformation(
-                        LogMessageBody,
+                        "Request {method} {url} returned {statusCode}; body: {body}",
                         context.Request.Method,
                         context.Request.Path.Value,
                         context.Response.StatusCode,
@@ -109,7 +106,7 @@ namespace API.Middlewares
                     break;
                 default:
                     logger.LogInformation(
-                        LogMessage,
+                        "Request {method} {url} returned {statusCode}",
                         context.Request.Method,
                         context.Request.Path.Value,
                         context.Response.StatusCode
@@ -118,40 +115,69 @@ namespace API.Middlewares
             }
         }
 
-        private void LogError(HttpContext context)
+        private async Task LogError(HttpContext context, string result, string? exception = null)
         {
+            string fullMessage;
             switch (context.Request.Method)
             {
                 case "GET" when !IsNullOrEmpty(context.Request.QueryString.ToString()):
+                    fullMessage = exception == null ?
+                        "Request {method} {url} returned {statusCode}; result: {result}; query: {queryString}" :
+                        "Request {method} {url} returned {statusCode}; result: {result}; query: {queryString}; exception: {exeption}";
                     logger.LogError(
-                        LogMessageQuery,
+                        fullMessage,
                         context.Request.Method,
                         context.Request.Path.Value,
                         context.Response.StatusCode,
-                        context.Request.QueryString
+                        result,
+                        context.Request.QueryString,
+                        exception
                     );
                     break;
                 case "POST":
                 case "PUT":
                 case "PATCH":
+                    fullMessage = exception == null ?
+                        "Request {method} {url} returned {statusCode}; result: {result}; body: {body}" :
+                        "Request {method} {url} returned {statusCode}; result: {result}; body: {body}; exception: {exeption}";
                     logger.LogError(
-                        LogMessageBody,
+                        fullMessage,
                         context.Request.Method,
                         context.Request.Path.Value,
                         context.Response.StatusCode,
-                        _body
+                        result,
+                        _body,
+                        exception
                     );
                     break;
                 default:
+                    fullMessage = exception == null ?
+                        "Request {method} {url} returned {statusCode}; result: {result}" :
+                        "Request {method} {url} returned {statusCode}; result: {result}; exception: {exeption}";
                     logger.LogError(
-                        LogMessage,
+                        fullMessage,
                         context.Request.Method,
                         context.Request.Path.Value,
-                        context.Response.StatusCode
+                        context.Response.StatusCode,
+                        result,
+                        exception
                     );
                     break;
             }
         }
         #endregion
+
+        private static bool NotAllowedBodyLogging(HttpContext context)
+        {
+            var notAllowedRequests = new List<(string Path, string Method)>
+            {
+                ("/api/user", "POST")
+            };
+
+            var requestPath = context.Request.Path.ToString().ToLower();
+            var requestMethod = context.Request.Method.ToUpper();
+
+            return notAllowedRequests.Any(r => r.Path == requestPath && r.Method == requestMethod);
+        }
     }
 }

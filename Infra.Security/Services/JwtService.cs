@@ -7,13 +7,14 @@ using Infra.Utils.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Infra.Security;
+namespace Infra.Security.Services;
 
 public class JwtService(IOptionsSnapshot<AppSettings> appSettings) : IJwtService
 {
     private readonly AppSettings _appSettings = appSettings.Value;
     private static JsonSerializerOptions jsonOptions
-        => new() {
+        => new()
+        {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true
         };
@@ -22,7 +23,7 @@ public class JwtService(IOptionsSnapshot<AppSettings> appSettings) : IJwtService
     {
         var secret = _appSettings.Jwt?.Secret!;
         var expirationTime = Convert.ToInt32(_appSettings.Jwt?.SessionExpirationHours);
-        
+
         var signinKey = new SigningCredentials(
             new SymmetricSecurityKey(Convert.FromBase64String(secret)),
             SecurityAlgorithms.HmacSha256
@@ -40,7 +41,7 @@ public class JwtService(IOptionsSnapshot<AppSettings> appSettings) : IJwtService
 
         return tokenHandler.WriteToken(token);
     }
-    
+
     private static ClaimsIdentity GetClaims(UserDto user)
     {
         var identity = new ClaimsIdentity("JWT");
