@@ -1,27 +1,25 @@
 ﻿using Domain.Common;
-using Domain.Entities.Dtos;
 using Domain.Exceptions;
 using Domain.SeedWork.Notification;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Controllers
 {
+    [AllowAnonymous]
     public class TestController() : BaseController
     {
         [HttpGet("405")]
-        [SwaggerOperation(Summary = "Returns not allowed exception")]
-        [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status405MethodNotAllowed)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [EndpointSummary("Default exception")]
+        [EndpointDescription("Returns not allowed exception")]
         public IActionResult GetNotAllowed()
         {
             throw new NotAllowedException();
         }
 
         [HttpGet("400")]
-        [SwaggerOperation(Summary = "Returns bad request")]
-        [ProducesResponseType(typeof(BaseResponse<object>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [EndpointSummary("Default bad request")]
+        [EndpointDescription("Returns bad request")]
         public IActionResult GetBadRequest()
         {
             NotificationsWrapper.AddNotification("Test error");
@@ -29,12 +27,11 @@ namespace API.Controllers
         }
 
         [HttpGet("200")]
-        [SwaggerOperation(Summary = "Returns OK")]
-        [ProducesResponseType(typeof(BaseResponse<UserDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [EndpointSummary("Default OK")]
+        [EndpointDescription("Returns OK")]
         public IActionResult Get()
         {
-            return Ok(new GenericResponse<UserDto>(user));
+            return Ok(new GenericResponse<object>(null));
         }
     }
 }

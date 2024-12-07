@@ -40,7 +40,7 @@ public class RedisCacheMiddleware(RequestDelegate next, IDistributedCache distri
             {
                 var options = new DistributedCacheEntryOptions
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
                 };
                 await distributedCache.SetStringAsync(cacheKey, responseBody, options);
             }
@@ -81,7 +81,7 @@ public class RedisCacheMiddleware(RequestDelegate next, IDistributedCache distri
     {
         var notAllowedRequests = new List<(string Path, string Method)>
         {
-            ("/api/test", "POST")
+            ("/api/{controller}", "POST")
         };
 
         var requestPath = context.Request.Path.ToString().ToLower();

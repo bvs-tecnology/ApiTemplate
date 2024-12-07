@@ -34,6 +34,12 @@ namespace Infra.IoC
             services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
+        public static void AddLocalCache(this IServiceCollection services, IConfiguration configuration) {
+            services.AddStackExchangeRedisCache(options => 
+                options.Configuration = configuration.GetConnectionString("Redis")
+            );
+        }
+
         public static void AddLocalHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHealthChecks()

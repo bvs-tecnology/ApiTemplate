@@ -171,7 +171,7 @@ namespace API.Middlewares
         {
             var notAllowedRequests = new List<(string Path, string Method)>
             {
-                ("/api/user", "POST")
+                ("/api/{controller}", "POST")
             };
 
             var requestPath = context.Request.Path.ToString().ToLower();
