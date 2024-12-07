@@ -15,10 +15,10 @@ jobs:
         with:
           files: '${{ github.workspace }}/API/appsettings.json'
         env:
-          App.Settings.ConnectionString: ${{ secrets.CONNECTION_STRING }}
-          App.Settings.Cache: ${{ secrets.REDIS_CONNECTION_STRING }}
-          App.Settings.Jwt.Secret: ${{ secrets.JWT_SECRET }}
-          Serilog.WriteTo: ${{ secrets.SEQ_WRITE }}
+          ConnectionStrings.Postgres: ${{ vars.POSTGRES_CONNECTION_STRING }}
+          ConnectionStrings.Redis: ${{ vars.REDIS_CONNECTION_STRING }}
+          AppSettings.Jwt.Secret: ${{ vars.JWT_SECRET }}
+          Serilog.WriteTo: ${{ vars.SERILOG_WRITE_TO }}
 
       - name: build
         run: |

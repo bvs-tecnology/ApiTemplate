@@ -1,21 +1,35 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
+using StackExchange.Redis;
 
 namespace Infra.Utils.Configuration
 {
     [ExcludeFromCodeCoverage]
     public static class Builders
     {
-        public static string BuildConnectionString(IConfiguration configuration)
+        public static string BuildPostgresConnectionString(IConfiguration configuration)
         {
-            var sqlBuilder = new SqlConnectionStringBuilder(configuration.GetConnectionString("SqlServer"))
+            var connBuilder = new NpgsqlConnectionStringBuilder(configuration.GetConnectionString("Postgres"))
             {
                 PersistSecurityInfo = true,
-                MultipleActiveResultSets = true,
-                ConnectTimeout = 15
+                Pooling = true,
+                CommandTimeout = 15
             };
-            return sqlBuilder.ConnectionString;
+            return connBuilder.ConnectionString;
+        }
+
+        public static string BuildRedisConnectionString(IConfiguration configuration)
+        {
+            var redisOptions = ConfigurationOptions.Parse(configuration.GetConnectionString("Redis")!);
+            redisOptions.AbortOnConnectFail = false;
+            redisOptions.ConnectRetry = 5;
+            redisOptions.ConnectTimeout = 5000;
+            redisOptions.SyncTimeout = 5000;
+            redisOptions.AllowAdmin = true;
+            redisOptions.DefaultDatabase = 0;
+
+            return redisOptions.ToString();
         }
     }
 }

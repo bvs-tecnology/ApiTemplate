@@ -3,11 +3,9 @@ using Application;
 using Domain.SeedWork.Notification;
 using Infra.Data;
 using Infra.Utils.Configuration;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Infra.IoC
 {
@@ -29,22 +27,19 @@ namespace Infra.IoC
 
         public static void AddLocalUnitOfWork(this IServiceCollection services, IConfiguration configuration)
         {
-            var connString = Builders.BuildConnectionString(configuration);
-            services.AddDbContext<Context>(options => options.UseLazyLoadingProxies().UseSqlServer(connString));
+            services.AddDbContext<Context>(options => options.UseLazyLoadingProxies().UseNpgsql(Builders.BuildPostgresConnectionString(configuration)));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
         public static void AddLocalCache(this IServiceCollection services, IConfiguration configuration) {
-            services.AddStackExchangeRedisCache(options => 
-                options.Configuration = configuration.GetConnectionString("Redis")
-            );
+            services.AddStackExchangeRedisCache(options => options.Configuration = Builders.BuildRedisConnectionString(configuration));
         }
 
         public static void AddLocalHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHealthChecks()
-                .AddSqlServer(Builders.BuildConnectionString(configuration))
-                .AddRedis(configuration.GetConnectionString("Redis")!);
+                .AddNpgSql(Builders.BuildPostgresConnectionString(configuration))
+                .AddRedis(Builders.BuildRedisConnectionString(configuration));
         }
     }
 }

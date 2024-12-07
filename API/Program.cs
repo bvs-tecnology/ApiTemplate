@@ -19,8 +19,8 @@ builder.Services.AddOpenApi();
 #region Local Injections
 builder.Services.AddLocalServices(builder.Configuration);
 builder.Services.AddLocalHttpClients(builder.Configuration);
-//builder.Services.AddLocalUnitOfWork(builder.Configuration);
-//builder.Services.AddLocalCache(builder.Configuration);
+builder.Services.AddLocalUnitOfWork(builder.Configuration);
+builder.Services.AddLocalCache(builder.Configuration);
 builder.Services.AddLocalHealthChecks(builder.Configuration);
 #endregion
 
@@ -59,7 +59,7 @@ app.UseAuthorization();
 
 #region Middlewares
 app.UseMiddleware<ControllerMiddleware>();
-//app.UseMiddleware<RedisCacheMiddleware>();
+app.UseMiddleware<RedisCacheMiddleware>();
 #endregion
 
 try
