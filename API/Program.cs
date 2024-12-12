@@ -33,28 +33,23 @@ builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfigura
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddOptions();
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAllOrigins", builder =>
-    {
-        builder.AllowAnyOrigin();
-        builder.AllowAnyHeader();
-        builder.AllowAnyMethod();
-    });
-});
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseCors("AllowAll");
+}
+else
+{
+    app.UseCors("AllowSpecificOrigin");
 }
 
 ServiceLocator.Initialize(app.Services.GetRequiredService<IContainer>());
 app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
 app.MapControllers();
 app.UseHttpsRedirection();
-app.UseCors("AllowAllOrigins");
 app.UseAuthorization();
 
 #region Middlewares
