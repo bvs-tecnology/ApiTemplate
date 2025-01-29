@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using API.Middlewares;
-using Domain.SeedWork.Notification;
 using HealthChecks.UI.Client;
 using Infra.IoC;
 using Infra.Security;
@@ -31,7 +30,6 @@ builder.Services.AddLocalCors();
 
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration));
 
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddOptions();
 
 var app = builder.Build();
@@ -46,7 +44,6 @@ else
     app.UseCors("AllowSpecificOrigin");
 }
 
-ServiceLocator.Initialize(app.Services.GetRequiredService<IContainer>());
 app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
 app.MapControllers();
 app.UseHttpsRedirection();

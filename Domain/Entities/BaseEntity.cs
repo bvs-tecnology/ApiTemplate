@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities;
+﻿using Domain.SeedWork.Notification;
+
+namespace Domain.Entities;
 
 public abstract class BaseEntity
 {

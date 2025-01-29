@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
     [AllowAnonymous]
-    public class TestController() : BaseController
+    public class TestController(INotification notification) : BaseController
     {
         [HttpGet("405")]
         [EndpointSummary("Default exception")]
@@ -22,7 +22,7 @@ namespace API.Controllers
         [EndpointDescription("Returns bad request")]
         public IActionResult GetBadRequest()
         {
-            NotificationsWrapper.AddNotification("Test error");
+            notification.AddNotification("Test error");
             throw new NotificationException();
         }
 
