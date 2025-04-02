@@ -25,10 +25,6 @@ namespace API.Middlewares
             {
                 await HandleNotificationExceptionAsync(context, notification.Notifications);
             }
-            catch (NotAllowedException)
-            {
-                await HandleNotAllowedException(context);
-            }
             catch (Exception ex)
             {
                 await HandleExceptionAsync(context, ex);
@@ -62,15 +58,6 @@ namespace API.Middlewares
             var stringResponse = JsonConvert.SerializeObject(result);
             await context.Response.WriteAsync(stringResponse);
             await LogError(context, stringResponse, exception.Message);
-        }
-        private async Task HandleNotAllowedException(HttpContext context)
-        {
-            var result = new GenericResponse<object>();
-            result.AddError(RequestErrorResponseConstant.NotAllowed);
-            UpdateContext(context, HttpStatusCode.MethodNotAllowed);
-            var stringResponse = JsonConvert.SerializeObject(result);
-            await context.Response.WriteAsync(stringResponse);
-            await LogError(context, stringResponse);
         }
         private static void UpdateContext(HttpContext context, HttpStatusCode code)
         {
