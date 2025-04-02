@@ -1,7 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
-using Domain.Entities.Dtos;
-using Infra.Security.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,9 +8,6 @@ namespace API.Controllers;
 [Authorize]
 public abstract class BaseController : Controller
 {
-    protected UserDto? user => GetType<UserDto>(JwtClaims.ClaimUserProfile);
-    protected IEnumerable<string>? scopes => GetType<IEnumerable<string>>(JwtClaims.ClaimScopes);
-
     #region Private Methods
     private string authToken => HttpContext.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
     private JwtSecurityToken token => new JwtSecurityTokenHandler().ReadJwtToken(authToken);
