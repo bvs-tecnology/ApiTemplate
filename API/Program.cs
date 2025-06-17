@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 var apiName = "Template API";
 
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.Configure<Keycloak>(builder.Configuration.GetSection("Keycloak"));
 builder.Services.AddOpenApi();
 
 #region Local Injections
@@ -47,6 +47,7 @@ else
 app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
 app.MapControllers();
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 #region Middlewares

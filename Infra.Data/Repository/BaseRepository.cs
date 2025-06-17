@@ -1,73 +1,45 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Domain;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infra.Data.Repository
 {
     [ExcludeFromCodeCoverage]
-    public class BaseRepository<TEntity>(IUnitOfWork unitOfWork) : IBaseRepository<TEntity> where TEntity : class
+    public class BaseRepository<T>(IUnitOfWork unitOfWork) : IBaseRepository<T> where T : BaseEntity
     {
-        public IQueryable<TEntity> GetAll() => unitOfWork.Context.Set<TEntity>().AsQueryable();
-
-        public async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> expression) => await GetAll().Where(expression).ToListAsync();
-        public async Task<IEnumerable<TEntity>> GetNoTrackingAsync(Expression<Func<TEntity, bool>> expression) => await GetAll().AsNoTracking().Where(expression).ToListAsync();
-
-        public IQueryable<TEntity> Get(Expression<Func<TEntity, bool>> expression) => GetAll().Where(expression);
-
-        public virtual async Task<TEntity?> GetByIDAsync(Guid id)
+        private readonly DbSet<T> _dbSet = unitOfWork.Context.Set<T>();
+        public IQueryable<T> GetAll() => _dbSet.AsQueryable();
+        public IQueryable<T> Get(Expression<Func<T, bool>> predicate) => _dbSet.Where(predicate).AsQueryable();
+        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> predicate) => await Get(predicate).ToListAsync();
+        public async Task<T> GetAsync(Guid id)
         {
-            return await unitOfWork.Context.Set<TEntity>().FindAsync(id);
+            var entity = await _dbSet.FindAsync(id);
+            if (entity == null) throw new ArgumentException("Entity not found");
+            return entity;
         }
-
-        public virtual async Task InsertWithSaveChangesAsync(TEntity entity)
+        public async Task<IEnumerable<T>> GetNoTrackingAsync(Expression<Func<T, bool>> predicate) => await Get(predicate).AsNoTracking().ToListAsync();
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate) => await _dbSet.AnyAsync(predicate);
+        public async Task SaveChangesAsync() => await unitOfWork.Context.SaveChangesAsync();
+        public async Task<T> InsertAsync(T entity)
         {
-            await unitOfWork.Context.Set<TEntity>().AddAsync(entity);
-            await unitOfWork.SaveChangesAsync();
+            await _dbSet.AddAsync(entity);
+            await SaveChangesAsync();
+            return entity;
         }
-
-        public virtual async Task InsertAsync(TEntity entity)
+        public async Task DeleteAsync(Guid id)
         {
-            await unitOfWork.Context.Set<TEntity>().AddAsync(entity);
+            var entity = await _dbSet.FindAsync(id);
+            if (entity == null) throw new ArgumentException("Entity not found");
+            await DeleteAsync(entity);
         }
-
-        public virtual async Task DeleteAsync(Guid id)
-        {
-            TEntity? entityToDelete = await unitOfWork.Context.Set<TEntity>().FindAsync(id);
-            await DeleteAsync(entityToDelete!);
-        }
-
-        public virtual async Task DeleteAsync(TEntity entity)
+        public async Task DeleteAsync(T entity)
         {
             if (unitOfWork.Context.Entry(entity).State == EntityState.Detached)
-            {
-                unitOfWork.Context.Set<TEntity>().Attach(entity);
-            }
-            unitOfWork.Context.Set<TEntity>().Remove(entity);
-            await unitOfWork.SaveChangesAsync();
-        }
-
-        public virtual async Task UpdateWithSaveChangesAsync(TEntity entity)
-        {
-            unitOfWork.Context.Set<TEntity>().Attach(entity);
-            unitOfWork.Context.Entry(entity).State = EntityState.Modified;
-            await unitOfWork.SaveChangesAsync();
-        }
-
-        public virtual void Update(TEntity entity)
-        {
-            unitOfWork.Context.Set<TEntity>().Attach(entity);
-            unitOfWork.Context.Entry(entity).State = EntityState.Modified;
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await unitOfWork.SaveChangesAsync();
-        }
-
-        public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> expression)
-        {
-            return await GetAll().AnyAsync(expression);
+                _dbSet.Attach(entity);
+            _dbSet.Remove(entity);
+            await SaveChangesAsync();
         }
     }
 }

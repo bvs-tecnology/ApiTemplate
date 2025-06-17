@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Domain.SeedWork.Notification;
 using Infra.Data;
+using Infra.Security.Helpers;
 using Infra.Utils.Configuration;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,10 +18,18 @@ namespace Infra.IoC
         public static void AddLocalServices(this IServiceCollection services, IConfiguration configuration)
         {
             #region Services
+            
             services.AddScoped<INotification, Notification>();
+            
             #endregion
 
             #region Repositories
+            #endregion
+            
+            #region Transforms
+
+            services.AddScoped<IClaimsTransformation, KeycloakClaimsTransformer>();
+
             #endregion
         }
 
