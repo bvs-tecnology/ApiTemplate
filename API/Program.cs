@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using API.Middlewares;
+using Elastic.Apm.NetCoreAll;
 using HealthChecks.UI.Client;
 using Infra.IoC;
 using Infra.Security;
@@ -14,6 +15,7 @@ var apiName = "Template API";
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.Configure<Keycloak>(builder.Configuration.GetSection("Keycloak"));
 builder.Services.AddOpenApi();
+builder.Services.AddAllElasticApm();
 
 #region Local Injections
 builder.Services.AddLocalServices(builder.Configuration);
@@ -49,6 +51,7 @@ app.MapControllers();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAllElasticApm(builder.Configuration);
 
 #region Middlewares
 app.UseMiddleware<ControllerMiddleware>();
