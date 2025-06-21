@@ -1,14 +1,53 @@
 using System.Text.Json.Serialization;
 using API.Middlewares;
+using API.Tracing;
+using Grafana.OpenTelemetry;
 using HealthChecks.UI.Client;
 using Infra.IoC;
 using Infra.Security;
 using Infra.Utils.Configuration;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Npgsql;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var apiName = "Template API";
+var resourceBuilder = ResourceBuilder.CreateDefault()
+    .AddService(serviceName: OpenTelemetryExtensions.ServiceName,
+        serviceVersion: OpenTelemetryExtensions.ServiceVersion);
+builder.Services.AddOpenTelemetry()
+    .WithTracing((traceBuilder) =>
+    {
+        traceBuilder
+            .AddSource(OpenTelemetryExtensions.ServiceName)
+            .SetResourceBuilder(resourceBuilder)
+            .AddAspNetCoreInstrumentation()
+            .AddNpgsql()
+            .AddConsoleExporter()
+            .UseGrafana();
+    })
+    .WithMetrics(metricsBuilder =>
+    {
+        metricsBuilder
+            .AddAspNetCoreInstrumentation()
+            .AddRuntimeInstrumentation()
+            .SetResourceBuilder(resourceBuilder)
+            .UseGrafana();
+    });
+
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options.SetResourceBuilder(resourceBuilder);
+    options.IncludeFormattedMessage = true;
+    options.IncludeScopes = true;
+    options.ParseStateValues = true;
+    options.AttachLogsToActivityEvent();
+    options.AddConsoleExporter();
+    options.UseGrafana();
+});
 
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.Configure<Keycloak>(builder.Configuration.GetSection("Keycloak"));
