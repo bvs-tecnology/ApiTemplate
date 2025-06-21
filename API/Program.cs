@@ -5,7 +5,6 @@ using Infra.IoC;
 using Infra.Security;
 using Infra.Utils.Configuration;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,8 +26,6 @@ builder.Services.AddLocalHealthChecks(builder.Configuration);
 builder.Services.AddLocalSecurity(builder.Configuration);
 builder.Services.AddLocalCors();
 #endregion
-
-builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration));
 
 builder.Services.AddOptions();
 
@@ -55,18 +52,5 @@ app.UseMiddleware<ControllerMiddleware>();
 app.UseMiddleware<RedisCacheMiddleware>();
 #endregion
 
-try
-{
-    Log.Information($"[{apiName}] Starting the application...");
-    app.Run();
-}
-catch (Exception ex)
-{
-    Log.Fatal(ex, $"[{apiName}] Application failed to start");
-}
-finally
-{
-    Log.Information($"[{apiName}] Finishing the application...");
-    Log.CloseAndFlush();
-}
+app.Run();
 
