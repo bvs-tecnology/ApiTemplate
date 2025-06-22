@@ -13,9 +13,12 @@ namespace Infra.IoC
     [ExcludeFromCodeCoverage]
     public static class NativeInjector
     {
-        public static void AddLocalHttpClients(this IServiceCollection services, IConfiguration configuration) {}
+        public static IServiceCollection AddLocalHttpClients(this IServiceCollection services, IConfiguration configuration)
+        {
+            return services;
+        }
 
-        public static void AddLocalServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddLocalServices(this IServiceCollection services, IConfiguration configuration)
         {
             #region Services
             
@@ -31,23 +34,28 @@ namespace Infra.IoC
             services.AddScoped<IClaimsTransformation, KeycloakClaimsTransformer>();
 
             #endregion
+            
+            return services;
         }
 
-        public static void AddLocalUnitOfWork(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddLocalUnitOfWork(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<Context>(options => options.UseLazyLoadingProxies().UseNpgsql(Builders.BuildPostgresConnectionString(configuration)));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            return services;
         }
 
-        public static void AddLocalCache(this IServiceCollection services, IConfiguration configuration) {
+        public static IServiceCollection AddLocalCache(this IServiceCollection services, IConfiguration configuration) {
             services.AddStackExchangeRedisCache(options => options.Configuration = Builders.BuildRedisConnectionString(configuration));
+            return services;
         }
 
-        public static void AddLocalHealthChecks(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddLocalHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHealthChecks()
                 .AddNpgSql(Builders.BuildPostgresConnectionString(configuration))
                 .AddRedis(Builders.BuildRedisConnectionString(configuration));
+            return services;
         }
     }
 }

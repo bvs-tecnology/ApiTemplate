@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Infra.Utils.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,10 +7,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infra.Security;
 
-public static class JwtInjector
+public static class KeycloakInjector
 {
-    public static void AddLocalSecurity(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddKeycloakAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<Keycloak>(configuration.GetSection("Keycloak"));
         services.AddAuthentication("Bearer")
             .AddJwtBearer("Bearer", options =>
             {
@@ -26,5 +28,6 @@ public static class JwtInjector
                 };
             });
         services.AddAuthorization();
+        return services;
     }
 }
