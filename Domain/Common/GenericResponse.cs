@@ -1,4 +1,6 @@
-﻿namespace Domain.Common;
+﻿using Domain.Common.ViewModel;
 
-public class GenericResponse<T>(T? result = null) : BaseResponse<T>(result) where T : class
+namespace Domain.Common;
+
+public class GenericResponse<T>(T? result = null) : BaseResponse<T>(result) where T : BaseViewModel
 { }

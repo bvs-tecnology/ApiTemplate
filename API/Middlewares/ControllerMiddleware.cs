@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using Domain.Common;
+using Domain.Common.ViewModel;
 using Domain.Exceptions;
 using Domain.SeedWork.Notification;
 using Infra.Utils.Constants;
@@ -43,7 +44,7 @@ namespace API.Middlewares
         #region HANDLERS
         private async Task HandleNotificationExceptionAsync(HttpContext context, List<NotificationModel> notifications)
         {
-            var result = new GenericResponse<object>();
+            var result = new GenericResponse<BaseViewModel>();
             notifications.ForEach(x => result.AddError(x.Message));
             UpdateContext(context, HttpStatusCode.BadRequest);
             var stringResponse = JsonConvert.SerializeObject(result);
@@ -52,7 +53,7 @@ namespace API.Middlewares
         }
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var result = new GenericResponse<object>();
+            var result = new GenericResponse<BaseViewModel>();
             result.AddError(IsDevelopment ? exception.Message : RequestErrorResponseConstant.InternalError);
             UpdateContext(context, HttpStatusCode.InternalServerError);
             var stringResponse = JsonConvert.SerializeObject(result);
