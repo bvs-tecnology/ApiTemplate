@@ -26,27 +26,35 @@ public class RedisCacheMiddleware(RequestDelegate next, IDistributedCache distri
         }
 
         var originalBodyStream = context.Response.Body;
-        using (var memoryStream = new MemoryStream())
+        await using var memoryStream = new MemoryStream();
+        context.Response.Body = memoryStream;
+
+        try
         {
-            context.Response.Body = memoryStream;
-
             await next(context);
-
+        }
+        catch (Exception)
+        {
+            // Não fecha a stream automaticamente em caso de exceptions.
+            context.Response.Body = originalBodyStream;
+            throw;
+        }
+        
+        context.Response.Body = originalBodyStream;
+        
+        if (context.Response.StatusCode == StatusCodes.Status200OK)
+        {
             memoryStream.Seek(0, SeekOrigin.Begin);
             var responseBody = await new StreamReader(memoryStream).ReadToEndAsync();
-            memoryStream.Seek(0, SeekOrigin.Begin);
-
-            if (context.Response.StatusCode == StatusCodes.Status200OK)
+            var options = new DistributedCacheEntryOptions
             {
-                var options = new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
-                };
-                await distributedCache.SetStringAsync(cacheKey, responseBody, options);
-            }
-
-            await memoryStream.CopyToAsync(originalBodyStream);
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
+            };
+            await distributedCache.SetStringAsync(cacheKey, responseBody, options);
         }
+
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        await memoryStream.CopyToAsync(originalBodyStream);
     }
     private static async Task<string> GetBody(HttpRequest request)
     {

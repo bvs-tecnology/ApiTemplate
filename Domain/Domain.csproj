@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <Folder Include="Common\InputModel\" />
+    <Folder Include="Common\ViewModel\" />
+    <Folder Include="Entities\Enums\" />
+    <Folder Include="Entities\Primitives\" />
   </ItemGroup>
 
 </Project>

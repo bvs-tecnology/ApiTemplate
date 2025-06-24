@@ -26,17 +26,16 @@ builder.Logging
 
 var app = builder.Build();
 
-app.MapOpenApi();
-app.UseLocalCors(builder.Environment);
-app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
-app.MapControllers();
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
-
 #region Middlewares
 app.UseMiddleware<ControllerMiddleware>();
+app.UseHttpsRedirection();
+app.UseLocalCors(builder.Environment);
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseMiddleware<RedisCacheMiddleware>();
+app.MapOpenApi();
+app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
+app.MapControllers();
 #endregion
 
 app.Run();
