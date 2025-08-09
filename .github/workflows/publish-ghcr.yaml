@@ -19,7 +19,7 @@ jobs:
 
       - name: Login to GitHub Container Registry
         run: |
-          docker login --username ${{ github.actor }} --password-stdin ${{ secrets.GHCR_TOKEN }} ghcr.io
+          docker login --username ${{ github.actor }} --password ${{ secrets.GHCR_TOKEN }} ghcr.io
   
       - name: Extract metadata for Docker
         id: meta
