@@ -17,15 +17,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Login to GitHub Container Registry
-        run: |
-          docker login --username ${{ github.actor }} --password ${{ secrets.GHCR_TOKEN }} ghcr.io
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_LOGIN }}" --password-stdin
   
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ${{ secrets.DOCKERHUB_LOGIN }}/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=sha
