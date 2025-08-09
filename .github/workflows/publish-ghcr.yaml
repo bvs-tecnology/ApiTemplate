@@ -18,8 +18,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Login to GitHub Container Registry
-        run: |
-          docker login --username ${{ github.actor }} --password-stdin ${{ secrets.GHCR_TOKEN }} ghcr.io
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u brunovbsilva --password-stdin
   
       - name: Extract metadata for Docker
         id: meta
