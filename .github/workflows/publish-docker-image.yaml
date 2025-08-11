@@ -27,7 +27,7 @@ jobs:
           images: ${{ vars.DOCKERHUB_LOGIN }}/${{ github.event.repository.name }}
           tags: |
             type=ref,event=branch
-            type=sha
+            type=sha,enable=${{ github.ref == 'refs/heads/main' }}
   
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
