@@ -24,15 +24,15 @@ public class KeycloakClaimsTransformer(IOptionsSnapshot<Keycloak> keycloak) : IC
         var parsed = JsonDocument.Parse(resourceAccess.Value);
 
         if (string.IsNullOrEmpty(_keycloak.ClientId) ||
-            !parsed.RootElement.TryGetProperty(_keycloak.ClientId, out var template) ||
-            !template.TryGetProperty("roles", out var roles))
+            !parsed.RootElement.TryGetProperty(_keycloak.ClientId, out var clientResources) ||
+            !clientResources.TryGetProperty("roles", out var clientRoles))
         {
             return Task.FromResult(principal);
         }
         
-        foreach (var roleValue in roles.EnumerateArray().Select(role => role.GetString()).OfType<string>())
+        foreach (var role in clientRoles.EnumerateArray().Select(role => role.GetString()).OfType<string>())
         {
-            identity.AddClaim(new Claim(ClaimTypes.Role, roleValue));
+            identity.AddClaim(new Claim(ClaimTypes.Role, role));
         }
 
         return Task.FromResult(principal);
