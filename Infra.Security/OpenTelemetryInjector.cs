@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -14,16 +15,17 @@ public static class OpenTelemetryInjector
     public static IServiceCollection AddOpenTemeletryConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         var apiName = configuration["ApiName"]!;
+        var otelUri = configuration["OpenTelemetryUrl"]!;
         var resourceBuilder = ResourceBuilder.CreateDefault().AddService(apiName);
         services.AddOpenTelemetry()
-            .WithTracing((traceBuilder) =>
+            .WithTracing(traceBuilder =>
             {
                 traceBuilder
                     .AddSource(apiName)
                     .SetResourceBuilder(resourceBuilder)
                     .AddAspNetCoreInstrumentation()
                     .AddNpgsql()
-                    .UseGrafana();
+                    .AddOtlpExporter(opt => opt.Endpoint = new Uri(otelUri));
             })
             .WithMetrics(metricsBuilder =>
             {
@@ -31,7 +33,7 @@ public static class OpenTelemetryInjector
                     .AddAspNetCoreInstrumentation()
                     .AddRuntimeInstrumentation()
                     .SetResourceBuilder(resourceBuilder)
-                    .UseGrafana();
+                    .AddOtlpExporter(opt => opt.Endpoint = new Uri(otelUri));
             });
         
         return services;
@@ -40,13 +42,14 @@ public static class OpenTelemetryInjector
     public static ILoggingBuilder AddOpenTelemetryConfiguration(this ILoggingBuilder logging, IConfiguration configuration)
     {
         var apiName = configuration["ApiName"]!;
+        var otelUri = configuration["OpenTelemetryUrl"]!;
         var resourceBuilder = ResourceBuilder.CreateDefault().AddService(apiName);
-        logging.AddOpenTelemetry(options =>
+        logging.AddOpenTelemetry(loggingBuilder =>
         {
-            options.SetResourceBuilder(resourceBuilder);
-            options.IncludeFormattedMessage = true;
-            options.AttachLogsToActivityEvent();
-            options.UseGrafana();
+            loggingBuilder.IncludeFormattedMessage = true;
+            loggingBuilder.SetResourceBuilder(resourceBuilder)
+                .AttachLogsToActivityEvent()
+                .AddOtlpExporter(opt => opt.Endpoint = new Uri(otelUri));
         });
         return logging;
     }
