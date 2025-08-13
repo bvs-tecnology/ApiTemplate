@@ -1,18 +1,14 @@
-﻿using Grafana.OpenTelemetry;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Npgsql;
+﻿using Npgsql;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace Infra.Security;
+namespace API.Configurators;
 
-public static class OpenTelemetryInjector
+public static class OpenTelemetryConfigurator
 {
-    public static IServiceCollection AddOpenTemeletryConfiguration(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOpenTelemetryConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         var apiName = configuration["ApiName"]!;
         var otelUri = configuration["OpenTelemetryUrl"]!;
@@ -24,6 +20,9 @@ public static class OpenTelemetryInjector
                     .AddSource(apiName)
                     .SetResourceBuilder(resourceBuilder)
                     .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddMassTransitInstrumentation()
+                    .AddSource("MassTransit")
                     .AddNpgsql()
                     .AddOtlpExporter(opt => opt.Endpoint = new Uri(otelUri));
             })
@@ -31,6 +30,7 @@ public static class OpenTelemetryInjector
             {
                 metricsBuilder
                     .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
                     .SetResourceBuilder(resourceBuilder)
                     .AddOtlpExporter(opt => opt.Endpoint = new Uri(otelUri));

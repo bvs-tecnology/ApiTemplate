@@ -21,6 +21,7 @@ namespace API.Middlewares
             var activity = Activity.Current;
             try
             {
+                AppendTraceIdToHeaders(context, activity);
                 await next(context);
                 activity?.SetStatus(ActivityStatusCode.Ok);
             }
@@ -28,10 +29,6 @@ namespace API.Middlewares
             {
                 activity?.SetStatus(ActivityStatusCode.Error);
                 await HandleExceptionAsync(context, ex);
-            }
-            finally
-            {
-                if (!context.Response.HasStarted) AppendTraceIdToHeaders(context, activity);
             }
         }
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
@@ -46,7 +43,7 @@ namespace API.Middlewares
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;
-            AppendTraceIdToHeaders(context, Activity.Current);
+            // AppendTraceIdToHeaders(context, Activity.Current);
         }
 
         private static void AppendTraceIdToHeaders(HttpContext context, Activity? activity)

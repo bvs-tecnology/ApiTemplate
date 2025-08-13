@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "http": {
+    "run Development": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "openapi/v1.json",
@@ -10,15 +10,15 @@
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5000"
     },
-    "https": {
-        "commandName": "Project",
-        "launchBrowser": true,
-        "launchUrl": "openapi/v1.json",
-        "environmentVariables": {
-            "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "dotnetRunMessages": true,
-        "applicationUrl": "https://localhost:5000"
+    "run Production": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "openapi/v1.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5000"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",

@@ -1,3 +1,4 @@
+using API.Configurators;
 using API.Middlewares;
 using HealthChecks.UI.Client;
 using Infra.IoC;
@@ -11,8 +12,9 @@ builder.Services.AddOpenApi();
 
 #region Injections
 builder.Services
-    .AddOpenTemeletryConfiguration(builder.Configuration)
+    .AddOpenTelemetryConfiguration(builder.Configuration)
     .AddLocalServices(builder.Configuration)
+    .AddLocalMassTransit(builder.Configuration)
     .AddLocalHttpClients(builder.Configuration)
     .AddLocalUnitOfWork(builder.Configuration)
     .AddLocalCache(builder.Configuration)

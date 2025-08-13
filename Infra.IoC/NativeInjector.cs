@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Application.Interfaces;
+using Application.Services;
 using Domain.SeedWork.Notification;
 using Infra.Data;
 using Infra.Security.Helpers;
@@ -23,6 +25,7 @@ namespace Infra.IoC
             #region Services
             
             services.AddScoped<INotification, Notification>();
+            services.AddScoped<ITestService, TestService>();
             
             #endregion
 
