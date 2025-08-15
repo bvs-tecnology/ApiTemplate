@@ -1,11 +1,11 @@
-﻿using Application.Interfaces;
-using Domain.Entities.Dtos;
+﻿using Domain.Entities.Dtos;
+using Domain.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using MassTransit;
 
 namespace Application.Services;
 
-public class TestService(ILogger<TestService> logger, IBus bus) : ITestService
+internal class TestService(ILogger<TestService> logger, IBus bus) : ITestService
 {
     public async Task<TestConsumerDto> TestExchange()
     {

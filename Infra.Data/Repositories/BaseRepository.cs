@@ -1,13 +1,14 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
-using Domain;
 using Domain.Entities;
+using Domain.Interfaces.Repositories;
+using Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infra.Data.Repository
+namespace Infra.Data.Repositories
 {
     [ExcludeFromCodeCoverage]
-    public class BaseRepository<T>(IUnitOfWork unitOfWork) : IBaseRepository<T> where T : BaseEntity
+    internal class BaseRepository<T>(IUnitOfWork unitOfWork) : IBaseRepository<T> where T : BaseEntity
     {
         private readonly DbSet<T> _dbSet = unitOfWork.Context.Set<T>();
         public IQueryable<T> GetAll() => _dbSet.AsQueryable();

@@ -4,6 +4,7 @@ using Domain.Common;
 using Domain.SeedWork.Notification;
 using Infra.Utils.Constants;
 using System.Text.Json;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -25,11 +26,23 @@ namespace API.Middlewares
                 await next(context);
                 activity?.SetStatus(ActivityStatusCode.Ok);
             }
+            catch (NotificationException ex)
+            {
+                activity?.SetStatus(ActivityStatusCode.Error);
+                await HandleExceptionAsync(context, ex);
+            }
             catch (Exception ex)
             {
                 activity?.SetStatus(ActivityStatusCode.Error);
                 await HandleExceptionAsync(context, ex);
             }
+        }
+        private async Task HandleExceptionAsync(HttpContext context, INotification notification)
+        {
+            var result = ErrorResponse.Factory.Create(notification.Notifications);
+            UpdateContext(context, HttpStatusCode.InternalServerError);
+            var stringResponse = JsonSerializer.Serialize(result, _jsonOptions);
+            await context.Response.WriteAsync(stringResponse);
         }
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {

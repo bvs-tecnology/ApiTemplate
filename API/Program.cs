@@ -2,7 +2,6 @@ using API.Configurators;
 using API.Middlewares;
 using HealthChecks.UI.Client;
 using Infra.IoC;
-using Infra.Security;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,11 +12,8 @@ builder.Services.AddOpenApi();
 #region Injections
 builder.Services
     .AddOpenTelemetryConfiguration(builder.Configuration)
-    .AddLocalServices(builder.Configuration)
+    .InjectDependencies(builder.Configuration)
     .AddLocalMassTransit(builder.Configuration)
-    .AddLocalHttpClients(builder.Configuration)
-    .AddLocalUnitOfWork(builder.Configuration)
-    .AddLocalCache(builder.Configuration)
     .AddLocalHealthChecks(builder.Configuration)
     .AddKeycloakAuthentication(builder.Configuration)
     .AddLocalCors()

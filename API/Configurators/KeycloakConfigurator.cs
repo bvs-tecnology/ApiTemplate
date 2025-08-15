@@ -1,13 +1,10 @@
 ﻿using System.Security.Claims;
 using Infra.Utils.Configuration;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Infra.Security;
+namespace API.Configurators;
 
-public static class KeycloakInjector
+public static class KeycloakConfigurator
 {
     public static IServiceCollection AddKeycloakAuthentication(this IServiceCollection services, IConfiguration configuration)
     {

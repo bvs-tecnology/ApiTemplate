@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using MassTransit;
-using OpenTelemetry;
-using OpenTelemetry.Context.Propagation;
+﻿using MassTransit;
 
 namespace API.Configurators;
 

@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Dtos;
 
-namespace Application.Interfaces;
+namespace Domain.Interfaces.Services;
 
 public interface ITestService
 {
