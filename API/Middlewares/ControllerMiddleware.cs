@@ -26,7 +26,7 @@ namespace API.Middlewares
                 await next(context);
                 activity?.SetStatus(ActivityStatusCode.Ok);
             }
-            catch (NotificationException ex)
+            catch (NotificationException)
             {
                 activity?.SetStatus(ActivityStatusCode.Error);
                 await HandleExceptionAsync(context, notification);
