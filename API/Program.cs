@@ -36,5 +36,5 @@ app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIRespon
 app.MapControllers();
 #endregion
 
-app.Run();
+await app.RunAsync();
 
