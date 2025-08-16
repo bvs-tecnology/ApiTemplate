@@ -29,7 +29,7 @@ namespace API.Middlewares
             catch (NotificationException ex)
             {
                 activity?.SetStatus(ActivityStatusCode.Error);
-                await HandleExceptionAsync(context, ex);
+                await HandleExceptionAsync(context, notification);
             }
             catch (Exception ex)
             {
@@ -56,7 +56,6 @@ namespace API.Middlewares
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;
-            // AppendTraceIdToHeaders(context, Activity.Current);
         }
 
         private static void AppendTraceIdToHeaders(HttpContext context, Activity? activity)
