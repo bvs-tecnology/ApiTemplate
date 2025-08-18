@@ -1,0 +1,1 @@
+﻿[![Quality Gate Status](https://sonarqube.bvsilva.com/api/project_badges/measure?project=ApiTemplate&metric=alert_status&token=sqb_38a1eb36c33335e2ca6241d563e7bbb69bfffe5d)](https://sonarqube.bvsilva.com/dashboard?id=ApiTemplate)
