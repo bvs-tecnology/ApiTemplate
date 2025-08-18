@@ -27,10 +27,16 @@ jobs:
             /k:"${{ vars.SONAR_API_KEY }}" ^
             /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" ^
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" ^
-            /d:sonar.cs.opencover.reportsPaths="Tests/TestResults/*/coverage.cobertura.xml"
+            /d:sonar.pullrequest.key="${{ github.event.pull_request.number }}" ^
+            /d:sonar.pullrequest.branch="${{ github.head_ref }}" ^
+            /d:sonar.pullrequest.base="${{ github.base_ref }}" ^
+            /d:sonar.cs.cobertura.reportsPaths="Tests/TestResults/*/coverage.cobertura.xml"
           
-          dotnet build
-          dotnet test --no-build --collect:"Code Coverage" --results-directory:Tests/TestResults
+          dotnet build --no-incremental
+          dotnet test --no-build --collect: "XPlat Code Coverage" --results-directory "Tests/TestResults" ^
+            /p:CollectCoverage=true ^
+            /p:CoverletOutputFormat=cobertura
           
-          dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          dotnet sonarscanner end ^
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         shell: cmd
