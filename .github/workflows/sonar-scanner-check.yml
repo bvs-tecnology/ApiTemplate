@@ -29,6 +29,7 @@ jobs:
         run: dotnet tool install --global dotnet-coverage
         
       - name: SonarQube Scan
+        shell: cmd
         run: |
           set PATH=%PATH%;%USERPROFILE%\.dotnet\tools
           
@@ -42,12 +43,42 @@ jobs:
           dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
           
           dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-        shell: cmd
         
       - name: SonarQube Quality Gate check
-        id: sonarqube-quality-gate-check
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        shell: cmd
+        run: |
+          Start-Sleep -Seconds 15
+
+          $reportFile = ".\.sonarqube\out\.sonar\report-task.txt"
+          $reportContent = Get-Content $reportFile -Raw | ConvertFrom-StringData
+          $ceTaskUrl = $reportContent.ceTaskUrl
+               
+          $headers = @{
+            "Authorization" = "Bearer ${{ secrets.SONAR_TOKEN }}"
+          }
+
+          $timeout = (Get-Date).AddMinutes(5)
+          while ((Get-Date) -lt $timeout) {
+            $taskResponse = Invoke-RestMethod -Uri $ceTaskUrl -Headers $headers
+            $taskStatus = $taskResponse.task.status
+            Write-Host "Status da análise do SonarQube: $taskStatus"
+            
+            if ($taskStatus -ne "PENDING" -and $taskStatus -ne "IN_PROGRESS") {
+              break
+            }
+            Start-Sleep -Seconds 10
+          }
+          
+          $analysisId = $taskResponse.task.analysisId
+          $qualityGateUrl = "${{ vars.SONAR_HOST_URL }}/api/qualitygates/project_status?analysisId=$analysisId"
+          $qualityGateResponse = Invoke-RestMethod -Uri $qualityGateUrl -Headers $headers
+          $qualityGateStatus = $qualityGateResponse.projectStatus.status
+          
+          Write-Host "Resultado do Quality Gate: $qualityGateStatus"
+          
+          if ($qualityGateStatus -ne "OK") {
+            Write-Error "O Quality Gate falhou! Resultado: $qualityGateStatus"
+            exit 1
+          } else {
+            Write-Host "O Quality Gate passou!"
+          }
