@@ -33,7 +33,7 @@ jobs:
             /k:"${{ vars.SONAR_API_KEY }}" ^
             /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" ^
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" ^
-            /d:sonar.cs.opencover.reportsPaths="Tests/TestResults/*/coverage.cobertura.xml"
+            /d:sonar.cs.opencover.reportsPaths="Tests/TestResults/*/coverage.opencover.xml"
           
           dotnet build --no-incremental
           dotnet test --no-build --collect: "XPlat Code Coverage" --results-directory "Tests/TestResults" ^
