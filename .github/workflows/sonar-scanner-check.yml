@@ -27,9 +27,6 @@ jobs:
             /k:"${{ vars.SONAR_API_KEY }}" ^
             /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" ^
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" ^
-            /d:sonar.pullrequest.key="${{ github.event.pull_request.number }}" ^
-            /d:sonar.pullrequest.branch="${{ github.head_ref }}" ^
-            /d:sonar.pullrequest.base="${{ github.base_ref }}" ^
             /d:sonar.cs.cobertura.reportsPaths="Tests/TestResults/*/coverage.cobertura.xml"
           
           dotnet build --no-incremental
