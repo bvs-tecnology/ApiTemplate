@@ -46,23 +46,27 @@ jobs:
         
       - name: SonarQube Quality Gate check
         shell: cmd
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
         run: |
-          $report = Get-Content ".sonarqube\out\.sonar\report-task.txt" | ForEach-Object {
-            $kv = $_ -split "="
-            if ($kv.Length -eq 2) { @{ Key=$kv[0]; Value=$kv[1] } }
-          } | Group-Object Key -AsHashTable -AsString
-
-          $ceTaskId = $report["ceTaskId"].Value
-          Write-Host "SonarQube ceTaskId: $ceTaskId"
-
-          # Consulta status da análise
-          $url = "${{ vars.SONAR_HOST_URL }}/api/qualitygates/project_status?ceTaskId=$ceTaskId"
-          $response = Invoke-RestMethod -Uri $url -Headers @{ Authorization = "Bearer ${{ secrets.SONAR_TOKEN }}" }
-
-          $status = $response.projectStatus.status
-          Write-Host "Quality Gate status: $status"
-
-          if ($status -ne "OK") {
-            Write-Error "Quality Gate failed with status $status"
-            exit 1
-          }
+          for /f "tokens=1,2 delims==" %%a in (.sonarqube\out\.sonar\report-task.txt) do (
+            if "%%a"=="ceTaskId" set CE_TASK_ID=%%b
+          )
+          
+          echo SonarQube ceTaskId: %CE_TASK_ID%
+          
+          curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/qualitygates/project_status?ceTaskId=%CE_TASK_ID% > qg.json
+          
+          for /f "tokens=*" %%i in ('type qg.json ^| findstr /i "status"') do set STATUS=%%i
+          
+          echo Quality Gate raw response: %STATUS%
+          
+          echo %STATUS% | findstr /i "\"OK\"" >nul
+          if errorlevel 1 (
+            echo Quality Gate failed!
+            type qg.json
+            exit /b 1
+          ) else (
+            echo Quality Gate passed!
+          )
