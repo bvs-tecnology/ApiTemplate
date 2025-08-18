@@ -2,8 +2,6 @@
 
 public class TestConsumerDto : BaseEntity
 {
-    public TestConsumerDto(Guid id)
-    {
-        CreatedBy = id;
-    }
+    public TestConsumerDto(): base(Guid.CreateVersion7()) {}
+    public TestConsumerDto(Guid id): base(id) {}
 }

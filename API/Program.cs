@@ -25,7 +25,9 @@ builder.Logging
 var app = builder.Build();
 
 #region Middlewares
-app.UseMiddleware<ControllerMiddleware>();
+app.UseMiddleware<TraceMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<ActivityStatusMiddleware>();
 app.UseHttpsRedirection();
 app.UseLocalCors(builder.Environment);
 app.UseAuthentication();

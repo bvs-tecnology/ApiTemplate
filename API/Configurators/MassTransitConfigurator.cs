@@ -1,7 +1,8 @@
-﻿using MassTransit;
+﻿using System.Diagnostics.CodeAnalysis;
+using MassTransit;
 
 namespace API.Configurators;
-
+[ExcludeFromCodeCoverage]
 public static class MassTransitConfigurator
 {
     public static IServiceCollection AddLocalMassTransit(this IServiceCollection services, IConfiguration configuration)

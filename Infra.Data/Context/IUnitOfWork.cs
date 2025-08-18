@@ -2,7 +2,8 @@
 {
     public interface IUnitOfWork
     {
-        Data.Context.Context Context { get; }
+        protected Context Context { get; }
+        Context GetContext();
         void SaveChanges();
         Task SaveChangesAsync();
     }
