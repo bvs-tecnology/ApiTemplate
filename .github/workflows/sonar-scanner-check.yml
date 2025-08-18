@@ -50,19 +50,33 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
         run: |
+          rem === Lê o ceTaskId do arquivo report-task.txt ===
           for /f "tokens=1,2 delims==" %%a in (.sonarqube\out\.sonar\report-task.txt) do (
             if "%%a"=="ceTaskId" set CE_TASK_ID=%%b
           )
-          
+
           echo SonarQube ceTaskId: %CE_TASK_ID%
-          
-          curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/qualitygates/project_status?ceTaskId=%CE_TASK_ID% > qg.json
-          
-          for /f "tokens=*" %%i in ('type qg.json ^| findstr /i "status"') do set STATUS=%%i
-          
-          echo Quality Gate raw response: %STATUS%
-          
-          echo %STATUS% | findstr /i "\"OK\"" >nul
+
+          rem === Chama API /ce/task para pegar analysisId ===
+          curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/ce/task?id=%CE_TASK_ID% > ce_task.json
+
+          for /f "tokens=*" %%i in ('type ce_task.json ^| findstr /i "analysisId"') do set ANALYSIS_LINE=%%i
+          for /f "tokens=2 delims=:" %%a in ("%ANALYSIS_LINE%") do set ANALYSIS_ID=%%~a
+          set ANALYSIS_ID=%ANALYSIS_ID:"=%
+          set ANALYSIS_ID=%ANALYSIS_ID:,=%
+          set ANALYSIS_ID=%ANALYSIS_ID:}=%
+          set ANALYSIS_ID=%ANALYSIS_ID: =%
+
+          echo SonarQube analysisId: %ANALYSIS_ID%
+
+          rem === Consulta status do Quality Gate ===
+          curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/qualitygates/project_status?analysisId=%ANALYSIS_ID% > qg.json
+
+          for /f "tokens=*" %%i in ('type qg.json ^| findstr /i "status"') do set STATUS_LINE=%%i
+
+          echo Quality Gate raw response: %STATUS_LINE%
+
+          echo %STATUS_LINE% | findstr /i "\"OK\"" >nul
           if errorlevel 1 (
             echo Quality Gate failed!
             type qg.json
