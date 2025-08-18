@@ -41,7 +41,7 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner
           echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           
-          cd $env:GITHUB_WORKSPACE\ApiTemplate  # entra na pasta onde está sua .sln
+#          cd $env:GITHUB_WORKSPACE\ApiTemplate  # entra na pasta onde está sua .sln
           
           dotnet sonarscanner begin `
           /k:"ApiTemplate" `
