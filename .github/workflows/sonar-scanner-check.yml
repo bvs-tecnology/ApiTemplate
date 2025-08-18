@@ -47,48 +47,22 @@ jobs:
       - name: SonarQube Quality Gate check
         shell: cmd
         run: |
-          @echo off
-          timeout /t 15 /nobreak > nul
+          $report = Get-Content ".sonarqube\out\.sonar\report-task.txt" | ForEach-Object {
+            $kv = $_ -split "="
+            if ($kv.Length -eq 2) { @{ Key=$kv[0]; Value=$kv[1] } }
+          } | Group-Object Key -AsHashTable -AsString
 
-          set CE_TASK_URL=
-          for /f "usebackq tokens=1,* delims==" %%a in (".\.sonarqube\out\.sonar\report-task.txt") do (
-            if "%%a"=="ceTaskUrl" set "CE_TASK_URL=%%b"
-          )
+          $ceTaskId = $report["ceTaskId"].Value
+          Write-Host "SonarQube ceTaskId: $ceTaskId"
 
-          if not defined CE_TASK_URL (
-            echo ERRO: Nao foi possivel encontrar a ceTaskUrl no arquivo de relatorio.
-            exit /b 1
-          )
+          # Consulta status da análise
+          $url = "${{ vars.SONAR_HOST_URL }}/api/qualitygates/project_status?ceTaskId=$ceTaskId"
+          $response = Invoke-RestMethod -Uri $url -Headers @{ Authorization = "Bearer ${{ secrets.SONAR_TOKEN }}" }
 
-          set ANALYSIS_ID=
-          for /L %%i in (1,1,30) do (
-            curl -s -u "%SONAR_TOKEN%:" "%CE_TASK_URL%" > task_response.json
-            for /f "delims=" %%j in ('powershell -Command "(Get-Content task_response.json -Raw | ConvertFrom-Json).task.status"') do set "TASK_STATUS=%%j"
-            echo Status da analise do SonarQube: %TASK_STATUS%
-            if not "%TASK_STATUS%"=="PENDING" if not "%TASK_STATUS%"=="IN_PROGRESS" (
-              for /f "delims=" %%k in ('powershell -Command "(Get-Content task_response.json -Raw | ConvertFrom-Json).task.analysisId"') do set "ANALYSIS_ID=%%k"
-              goto :analysis_complete
-            )
-            timeout /t 10 /nobreak > nul
-          )
+          $status = $response.projectStatus.status
+          Write-Host "Quality Gate status: $status"
 
-          echo ERRO: Timeout! A analise do SonarQube demorou mais de 5 minutos para completar.
-          del task_response.json > nul 2>&1
-          exit /b 1
-
-          :analysis_complete
-          set "QUALITY_GATE_URL=%SONAR_HOST_URL%/api/qualitygates/project_status?analysisId=%ANALYSIS_ID%"
-          curl -s -u "%SONAR_TOKEN%:" "%QUALITY_GATE_URL%" > qg_response.json
-          
-          for /f "delims=" %%j in ('powershell -Command "(Get-Content qg_response.json -Raw | ConvertFrom-Json).projectStatus.status"') do set "QUALITY_GATE_STATUS=%%j"
-          echo Resultado do Quality Gate: %QUALITY_GATE_STATUS%
-
-          del task_response.json > nul 2>&1
-          del qg_response.json > nul 2>&1
-          
-          if not "%QUALITY_GATE_STATUS%"=="OK" (
-            echo O Quality Gate falhou! Resultado: %QUALITY_GATE_STATUS%
-            exit /b 1
-          )
-
-          echo O Quality Gate passou!
+          if ($status -ne "OK") {
+            Write-Error "Quality Gate failed with status $status"
+            exit 1
+          }
