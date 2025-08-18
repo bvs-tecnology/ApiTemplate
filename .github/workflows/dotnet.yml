@@ -35,12 +35,15 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
       - name: SonarQube Scan
+        shell: pwsh
         run: |
-          dotnet tool install --global dotnet-sonarscanner
-          export PATH="$PATH:/home/runner/.dotnet/tools"
-          dotnet sonarscanner begin /k:"ApiTemplate" /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
+          dotnet sonarscanner begin `
+            /k:"ApiTemplate" `
+            /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" `
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
           dotnet build
           dotnet test --no-build --collect:"XPlat Code Coverage"
-          dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"      
+          dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"   
