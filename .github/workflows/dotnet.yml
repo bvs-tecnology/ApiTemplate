@@ -39,15 +39,16 @@ jobs:
       - name: SonarQube Scan
         run: |
           dotnet tool install --global dotnet-sonarscanner
-          echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          set PATH=%PATH%;%USERPROFILE%\.dotnet\tools
           
-          dotnet sonarscanner begin `
-          /k:"ApiTemplate" `
-          /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" `
-          /d:sonar.login="${{ secrets.SONAR_TOKEN }}" `
-          /d:sonar.cs.opencover.reportsPaths="**\coverage.cobertura.xml"
+          dotnet sonarscanner begin ^
+            /k:"ApiTemplate" ^
+            /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" ^
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" ^
+            /d:sonar.cs.opencover.reportsPaths="**\coverage.cobertura.xml"
           
           dotnet build ApiTemplate.sln
           dotnet test Tests/Tests.csproj --no-build --collect:"XPlat Code Coverage"
           
           dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        shell: cmd
