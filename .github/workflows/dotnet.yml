@@ -42,13 +42,13 @@ jobs:
           set PATH=%PATH%;%USERPROFILE%\.dotnet\tools
           
           dotnet sonarscanner begin ^
-            /k:"ApiTemplate" ^
+            /k:"${{ vars.SONAR_API_KEY }}" ^
             /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" ^
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" ^
-            /d:sonar.cs.opencover.reportsPaths="**\coverage.cobertura.xml"
+            /d:sonar.cs.opencover.reportsPaths="Tests/TestResults/coverage.cobertura.xml"
           
           dotnet build ApiTemplate.sln
-          dotnet test Tests/Tests.csproj --no-build --collect:"XPlat Code Coverage"
+          dotnet test Tests/Tests.csproj --no-build --collect:"XPlat Code Coverage" --results-directory:Tests/TestResults
           
           dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         shell: cmd
