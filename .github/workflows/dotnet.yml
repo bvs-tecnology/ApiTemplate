@@ -32,12 +32,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
-      - name: Check Quality Gate
-        uses: SonarSource/sonarqube-quality-gate-action@v1
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          export PATH="$PATH:/home/runner/.dotnet/tools"
+          dotnet sonarscanner begin /k:"ApiTemplate" /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          dotnet build
+          dotnet test --no-build --collect:"XPlat Code Coverage"
+          dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"      
