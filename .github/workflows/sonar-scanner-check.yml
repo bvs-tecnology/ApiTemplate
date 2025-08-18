@@ -57,27 +57,37 @@ jobs:
 
           echo SonarQube ceTaskId: %CE_TASK_ID%
 
-          rem === Chama API /ce/task para pegar analysisId ===
+          rem === Tenta obter analysisId até 10 vezes ===
+          set RETRIES=0
+          :WAIT_LOOP
           curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/ce/task?id=%CE_TASK_ID% > ce_task.json
 
-          for /f "tokens=*" %%i in ('type ce_task.json ^| findstr /i "analysisId"') do set ANALYSIS_LINE=%%i
-          for /f "tokens=2 delims=:" %%a in ("%ANALYSIS_LINE%") do set ANALYSIS_ID=%%~a
+          for /f "tokens=2 delims=:," %%a in ('type ce_task.json ^| findstr /i "analysisId"') do set ANALYSIS_ID=%%~a
           set ANALYSIS_ID=%ANALYSIS_ID:"=%
-          set ANALYSIS_ID=%ANALYSIS_ID:,=%
-          set ANALYSIS_ID=%ANALYSIS_ID:}=%
-          set ANALYSIS_ID=%ANALYSIS_ID: =%
+
+          if "%ANALYSIS_ID%"=="" (
+            set /a RETRIES+=1
+            if %RETRIES% GEQ 10 (
+              echo ERROR: analysisId não disponível após %RETRIES% tentativas.
+              type ce_task.json
+              exit /b 1
+            )
+            echo AnalysisId ainda não disponível... aguardando 5 segundos
+            timeout /t 5 >nul
+            goto WAIT_LOOP
+          )
 
           echo SonarQube analysisId: %ANALYSIS_ID%
 
           rem === Consulta status do Quality Gate ===
           curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/qualitygates/project_status?analysisId=%ANALYSIS_ID% > qg.json
 
-          for /f "tokens=*" %%i in ('type qg.json ^| findstr /i "status"') do set STATUS_LINE=%%i
+          for /f "tokens=2 delims=:, " %%a in ('type qg.json ^| findstr /i "status"') do set STATUS=%%~a
+          set STATUS=%STATUS:"=%
 
-          echo Quality Gate raw response: %STATUS_LINE%
+          echo Quality Gate status: %STATUS%
 
-          echo %STATUS_LINE% | findstr /i "\"OK\"" >nul
-          if errorlevel 1 (
+          if /i not "%STATUS%"=="OK" (
             echo Quality Gate failed!
             type qg.json
             exit /b 1
