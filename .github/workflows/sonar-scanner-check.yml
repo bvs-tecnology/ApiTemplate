@@ -45,75 +45,56 @@ jobs:
           dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
         
       - name: SonarQube Quality Gate check
-        shell: cmd
+        shell: pwsh
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
         run: |
-          rem === Lê o ceTaskId do arquivo report-task.txt ===
-          for /f "tokens=1,2 delims==" %%a in (.sonarqube\out\.sonar\report-task.txt) do (
-            if "%%a"=="ceTaskId" set CE_TASK_ID=%%b
-          )
+          # === Lê o ceTaskId do arquivo report-task.txt ===
+          $report = Get-Content ".sonarqube\out\.sonar\report-task.txt" | ForEach-Object {
+            $kv = $_ -split "="
+            if ($kv.Length -eq 2) { @{ Key=$kv[0]; Value=$kv[1] } }
+          } | Group-Object Key -AsHashTable -AsString
 
-          echo SonarQube ceTaskId: %CE_TASK_ID%
+          $ceTaskId = $report["ceTaskId"].Value
+          Write-Host "SonarQube ceTaskId: $ceTaskId"
 
-          rem === Tenta obter analysisId até 10 vezes ===
-          set RETRIES=0
-          set ANALYSIS_ID=
+          # === Tenta obter analysisId até 10 vezes ===
+          $analysisId = $null
+          $retries = 0
+          while (-not $analysisId -and $retries -lt 10) {
+            $resp = Invoke-RestMethod -Uri "$env:SONAR_HOST_URL/api/ce/task?id=$ceTaskId" -Headers @{ Authorization = "Bearer $env:SONAR_TOKEN" }
+            $analysisId = $resp.task.analysisId
+            if (-not $analysisId) {
+              $retries++
+              Write-Host "AnalysisId ainda não disponível... aguardando 5 segundos (tentativa $retries)"
+              Start-Sleep -Seconds 5
+            }
+          }
 
-          :WAIT_LOOP
-          curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/ce/task?id=%CE_TASK_ID% > ce_task.json
+          if (-not $analysisId) {
+            Write-Error "AnalysisId não encontrado após $retries tentativas"
+            exit 1
+          }
 
-          for /f "tokens=2 delims=:," %%a in ('type ce_task.json ^| findstr /i "analysisId"') do (
-            set ANALYSIS_ID=%%a
-          )
+          Write-Host "SonarQube analysisId: $analysisId"
 
-          rem --- Sanitiza valor ---
-          set ANALYSIS_ID=%ANALYSIS_ID:"=%
-          set ANALYSIS_ID=%ANALYSIS_ID: =%
-          set ANALYSIS_ID=%ANALYSIS_ID:}=%
-          set ANALYSIS_ID=%ANALYSIS_ID:,=%
+          # === Consulta status do Quality Gate (aguarda até sair de IN_PROGRESS) ===
+          $status = "IN_PROGRESS"
+          $qgRetries = 0
+          while ($status -eq "IN_PROGRESS" -and $qgRetries -lt 20) {
+            $resp = Invoke-RestMethod -Uri "$env:SONAR_HOST_URL/api/qualitygates/project_status?analysisId=$analysisId" -Headers @{ Authorization = "Bearer $env:SONAR_TOKEN" }
+            $status = $resp.projectStatus.status
+            Write-Host "Quality Gate status: $status"
+            if ($status -eq "IN_PROGRESS") {
+              $qgRetries++
+              Start-Sleep -Seconds 5
+            }
+          }
 
-          if not defined ANALYSIS_ID (
-            set /a RETRIES+=1
-            if %RETRIES% GEQ 10 (
-              echo ERROR: analysisId não disponível após %RETRIES% tentativas.
-              type ce_task.json
-              exit /b 1
-            )
-            echo AnalysisId ainda não disponível... aguardando 5 segundos
-            timeout /t 5 >nul
-            goto WAIT_LOOP
-          )
+          if ($status -ne "OK") {
+            Write-Error "Quality Gate failed with status $status"
+            exit 1
+          }
 
-          echo SonarQube analysisId: %ANALYSIS_ID%
-
-          rem === Consulta status do Quality Gate ===
-          curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/qualitygates/project_status?analysisId=%ANALYSIS_ID% > qg.json
-
-          set STATUS=
-          for /f "tokens=2 delims=:," %%a in ('type qg.json ^| findstr /i "status"') do (
-            set STATUS=%%a
-          )
-
-          rem --- Sanitiza status ---
-          set STATUS=%STATUS:"=%
-          set STATUS=%STATUS: =%
-          set STATUS=%STATUS:}=%
-          set STATUS=%STATUS:,=%
-
-          if not defined STATUS (
-            echo ERROR: não foi possível extrair STATUS
-            type qg.json
-            exit /b 1
-          )
-
-          echo Quality Gate status: %STATUS%
-
-          if /i "%STATUS%" NEQ "OK" (
-            echo Quality Gate failed!
-            type qg.json
-            exit /b 1
-          ) else (
-            echo Quality Gate passed!
-          )
+          Write-Host "Quality Gate passed!"
