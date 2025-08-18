@@ -38,6 +38,7 @@ jobs:
           dotnet-version: '9.0.x'
       - name: SonarQube Scan
         run: |
+          dotnet tool install --global dotnet-sonarscanner
           $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
           dotnet sonarscanner begin `
             /k:"ApiTemplate" `
