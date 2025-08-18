@@ -59,13 +59,15 @@ jobs:
 
           rem === Tenta obter analysisId até 10 vezes ===
           set RETRIES=0
+          set ANALYSIS_ID=
+
           :WAIT_LOOP
           curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/ce/task?id=%CE_TASK_ID% > ce_task.json
 
-          for /f "tokens=2 delims=:," %%a in ('type ce_task.json ^| findstr /i "analysisId"') do set ANALYSIS_ID=%%~a
+          for /f "tokens=2 delims=:, " %%a in ('type ce_task.json ^| findstr /i "analysisId"') do set ANALYSIS_ID=%%~a
           set ANALYSIS_ID=%ANALYSIS_ID:"=%
 
-          if "%ANALYSIS_ID%"=="" (
+          if not defined ANALYSIS_ID (
             set /a RETRIES+=1
             if %RETRIES% GEQ 10 (
               echo ERROR: analysisId não disponível após %RETRIES% tentativas.
