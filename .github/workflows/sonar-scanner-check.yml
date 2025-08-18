@@ -45,7 +45,7 @@ jobs:
           dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
         
       - name: SonarQube Quality Gate check
-        shell: pwsh
+        shell: powershell
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
@@ -55,10 +55,10 @@ jobs:
             $kv = $_ -split "="
             if ($kv.Length -eq 2) { @{ Key=$kv[0]; Value=$kv[1] } }
           } | Group-Object Key -AsHashTable -AsString
-
+          
           $ceTaskId = $report["ceTaskId"].Value
           Write-Host "SonarQube ceTaskId: $ceTaskId"
-
+          
           # === Tenta obter analysisId até 10 vezes ===
           $analysisId = $null
           $retries = 0
@@ -71,14 +71,14 @@ jobs:
               Start-Sleep -Seconds 5
             }
           }
-
+          
           if (-not $analysisId) {
             Write-Error "AnalysisId não encontrado após $retries tentativas"
             exit 1
           }
-
+          
           Write-Host "SonarQube analysisId: $analysisId"
-
+          
           # === Consulta status do Quality Gate (aguarda até sair de IN_PROGRESS) ===
           $status = "IN_PROGRESS"
           $qgRetries = 0
@@ -91,10 +91,10 @@ jobs:
               Start-Sleep -Seconds 5
             }
           }
-
+          
           if ($status -ne "OK") {
             Write-Error "Quality Gate failed with status $status"
             exit 1
           }
-
+          
           Write-Host "Quality Gate passed!"
