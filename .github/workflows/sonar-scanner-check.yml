@@ -64,10 +64,15 @@ jobs:
           :WAIT_LOOP
           curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/ce/task?id=%CE_TASK_ID% > ce_task.json
 
-          for /f "tokens=2 delims=:," %%a in ('type ce_task.json ^| findstr /i "analysisId"') do set ANALYSIS_ID=%%a
+          for /f "tokens=2 delims=:," %%a in ('type ce_task.json ^| findstr /i "analysisId"') do (
+            set ANALYSIS_ID=%%a
+          )
+
+          rem --- Sanitiza valor ---
           set ANALYSIS_ID=%ANALYSIS_ID:"=%
           set ANALYSIS_ID=%ANALYSIS_ID: =%
           set ANALYSIS_ID=%ANALYSIS_ID:}=%
+          set ANALYSIS_ID=%ANALYSIS_ID:,=%
 
           if not defined ANALYSIS_ID (
             set /a RETRIES+=1
@@ -87,10 +92,15 @@ jobs:
           curl -s -u %SONAR_TOKEN%: %SONAR_HOST_URL%/api/qualitygates/project_status?analysisId=%ANALYSIS_ID% > qg.json
 
           set STATUS=
-          for /f "tokens=2 delims=:," %%a in ('type qg.json ^| findstr /i "status"') do set STATUS=%%a
+          for /f "tokens=2 delims=:," %%a in ('type qg.json ^| findstr /i "status"') do (
+            set STATUS=%%a
+          )
+
+          rem --- Sanitiza status ---
           set STATUS=%STATUS:"=%
           set STATUS=%STATUS: =%
           set STATUS=%STATUS:}=%
+          set STATUS=%STATUS:,=%
 
           if not defined STATUS (
             echo ERROR: não foi possível extrair STATUS
