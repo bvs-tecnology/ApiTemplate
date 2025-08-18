@@ -1,4 +1,4 @@
-name: .NET
+name: SonarQube scan check
 
 on:
   pull_request:
@@ -14,20 +14,25 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
+          
+      - name: Setup SonarScanner
+        run: dotnet tool install --global dotnet-sonarscanner
+        
       - name: SonarQube Scan
         run: |
-          dotnet tool install --global dotnet-sonarscanner
           set PATH=%PATH%;%USERPROFILE%\.dotnet\tools
           
           dotnet sonarscanner begin ^
             /k:"${{ vars.SONAR_API_KEY }}" ^
             /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" ^
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" ^
-            /d:sonar.projectBaseDir=. ^
             /d:sonar.cs.cobertura.reportsPaths="Tests/TestResults/*/coverage.cobertura.xml" ^
             /d:sonar.verbose=true
           
@@ -35,13 +40,6 @@ jobs:
           dotnet test --no-build --collect: "XPlat Code Coverage" --results-directory "Tests/TestResults" ^
             /p:CollectCoverage=true ^
             /p:CoverletOutputFormat=cobertura
-          
-          # --- NOVO PASSO DE DEBUG ---
-          echo "========================================================================"
-          echo "Verificando o conteudo de TestResults para confirmar o relatorio de cobertura..."
-          dir Tests\TestResults /s
-          echo "========================================================================"
-          # --- FIM DO PASSO DE DEBUG ---
           
           dotnet sonarscanner end ^
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
