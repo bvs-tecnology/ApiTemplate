@@ -44,11 +44,11 @@ jobs:
           dotnet sonarscanner begin ^
             /k:"${{ vars.SONAR_API_KEY }}" ^
             /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" ^
-            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" ^
-            /d:sonar.cs.opencover.reportsPaths="Tests/TestResults/coverage.cobertura.xml"
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" ^
+            /d:sonar.cs.opencover.reportsPaths="test_results/coverage.cobertura.xml"
           
-          dotnet build ApiTemplate.sln
-          dotnet test Tests/Tests.csproj --no-build --collect:"XPlat Code Coverage" --results-directory:Tests/TestResults
+          dotnet build
+          dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory:test_results
           
           dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         shell: cmd
