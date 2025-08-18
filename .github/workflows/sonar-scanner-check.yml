@@ -24,6 +24,9 @@ jobs:
           
       - name: Setup SonarScanner
         run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Setup .Net Coverage
+        run: dotnet tool install --global dotnet-coverage
         
       - name: SonarQube Scan
         run: |
@@ -33,13 +36,10 @@ jobs:
             /k:"${{ vars.SONAR_API_KEY }}" ^
             /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" ^
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" ^
-            /d:sonar.cs.opencover.reportsPaths="Tests/TestResults/*/coverage.opencover.xml"
+            /d:sonar.cs.vscoveragexml.reportsPaths="coverage.xml"
           
           dotnet build --no-incremental
-          dotnet test --no-build --collect: "XPlat Code Coverage" --results-directory "Tests/TestResults" ^
-            /p:CollectCoverage=true ^
-            /p:CoverletOutputFormat=opencover
+          dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
           
-          dotnet sonarscanner end ^
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
         shell: cmd
