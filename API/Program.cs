@@ -25,7 +25,9 @@ builder.Logging
 var app = builder.Build();
 
 #region Middlewares
-app.UseMiddleware<ControllerMiddleware>();
+app.UseMiddleware<TraceMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<ActivityStatusMiddleware>();
 app.UseHttpsRedirection();
 app.UseLocalCors(builder.Environment);
 app.UseAuthentication();
@@ -36,5 +38,5 @@ app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIRespon
 app.MapControllers();
 #endregion
 
-app.Run();
+await app.RunAsync();
 

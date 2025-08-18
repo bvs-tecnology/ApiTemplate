@@ -18,7 +18,7 @@ public class RedisCacheMiddleware(RequestDelegate next, IDistributedCache distri
         var cacheKey = GenerateCacheKeyFromRequest(context);
 
         var cachedResponse = await distributedCache.GetStringAsync(cacheKey);
-        if (!string.IsNullOrEmpty(cachedResponse))
+        if (!IsNullOrEmpty(cachedResponse))
         {
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(cachedResponse);

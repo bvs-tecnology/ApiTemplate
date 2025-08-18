@@ -3,10 +3,11 @@
 namespace Infra.Data.Context
 {
     [ExcludeFromCodeCoverage]
-    public class UnitOfWork(Data.Context.Context context) : IUnitOfWork, IDisposable
+    public class UnitOfWork(Context context) : IUnitOfWork, IDisposable
     {
-        public Data.Context.Context Context { get; set; } = context;
+        public Context Context { get; } = context;
 
+        public Context GetContext() => Context;
         public void SaveChanges()
         {
             Context.SaveChanges();

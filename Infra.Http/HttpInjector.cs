@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infra.Http;
-
+[ExcludeFromCodeCoverage]
 public static class HttpInjector
 {
     public static IServiceCollection InjectHttp(this IServiceCollection services, IConfiguration configuration)

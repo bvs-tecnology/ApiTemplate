@@ -8,22 +8,20 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infra.IoC
+namespace Infra.IoC;
+[ExcludeFromCodeCoverage]
+public static class NativeInjector
 {
-    [ExcludeFromCodeCoverage]
-    public static class NativeInjector
+    public static IServiceCollection InjectDependencies(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection InjectDependencies(this IServiceCollection services, IConfiguration configuration)
-        {
-            services
-                .InjectData(configuration)
-                .InjectHttp(configuration)
-                .InjectApplication();
-            
-            services.AddScoped<INotification, Notification>();
-            services.AddScoped<IClaimsTransformation, KeycloakClaimsTransformer>();
-            
-            return services;
-        }
+        services
+            .InjectData(configuration)
+            .InjectHttp(configuration)
+            .InjectApplication();
+        
+        services.AddScoped<INotification, Notification>();
+        services.AddScoped<IClaimsTransformation, KeycloakClaimsTransformer>();
+        
+        return services;
     }
 }
