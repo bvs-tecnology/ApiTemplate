@@ -1,11 +1,12 @@
 ﻿using System.Text;
+using Domain.Common.Constants;
 using Microsoft.Extensions.Caching.Distributed;
 using static System.String;
 
 namespace API.Middlewares;
 public class RedisCacheMiddleware(RequestDelegate next, IDistributedCache distributedCache)
 {
-    private string _body = Empty;
+    private string _requestBody = Empty;
     public async Task InvokeAsync(HttpContext context)
     {
         if (NotAllowedCache(context))
@@ -14,11 +15,10 @@ public class RedisCacheMiddleware(RequestDelegate next, IDistributedCache distri
             return;
         }
 
-        _body = await GetBody(context.Request);
+        _requestBody = await GetRequestBody(context.Request);
         var cacheKey = GenerateCacheKeyFromRequest(context);
-
         var cachedResponse = await distributedCache.GetStringAsync(cacheKey);
-        if (!string.IsNullOrEmpty(cachedResponse))
+        if (!IsNullOrEmpty(cachedResponse))
         {
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(cachedResponse);
@@ -56,7 +56,7 @@ public class RedisCacheMiddleware(RequestDelegate next, IDistributedCache distri
         memoryStream.Seek(0, SeekOrigin.Begin);
         await memoryStream.CopyToAsync(originalBodyStream);
     }
-    private static async Task<string> GetBody(HttpRequest request)
+    private static async Task<string> GetRequestBody(HttpRequest request)
     {
         request.EnableBuffering();
         using var reader = new StreamReader(request.Body, encoding: Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: 1024, leaveOpen: true);
@@ -77,9 +77,9 @@ public class RedisCacheMiddleware(RequestDelegate next, IDistributedCache distri
             keyBuilder.Append($"?{request.QueryString.Value}");
         }
 
-        if (request.Method == "POST" || request.Method == "PUT")
+        if (request.Method is RequestMethod.Post or RequestMethod.Put)
         {
-            keyBuilder.Append($":{_body}");
+            keyBuilder.Append($":{_requestBody}");
         }
 
         return keyBuilder.ToString();
@@ -89,7 +89,7 @@ public class RedisCacheMiddleware(RequestDelegate next, IDistributedCache distri
     {
         var notAllowedRequests = new List<(string Path, string Method)>
         {
-            ("/api/{controller}", "POST")
+            ("/api/fake-path", RequestMethod.Post)
         };
 
         var requestPath = context.Request.Path.ToString().ToLower();

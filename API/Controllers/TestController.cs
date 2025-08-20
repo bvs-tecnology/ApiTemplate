@@ -1,17 +1,17 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Domain.Exceptions;
+using Domain.Interfaces.Services;
+using Domain.SeedWork.Notification;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-public class TestController : BaseController
+public class TestController(
+    ILogger<TestController> logger,
+    ITestService testService,
+    INotification notification
+) : BaseController
 {
-    private readonly ILogger<TestController> _logger;
-
-    public TestController(ILogger<TestController> logger)
-    {
-        _logger = logger;
-    }
-
     [HttpGet("token")]
     public IActionResult Token()
     {
@@ -27,19 +27,28 @@ public class TestController : BaseController
 
     [HttpGet("free")]
     [AllowAnonymous]
-    public IActionResult Free()
+    public async Task<IActionResult> Free()
     {
-        _logger.LogInformation("starting free method");
-        _logger.LogInformation("finishing free method");
-        return Ok();
+        logger.LogInformation("starting free method");
+        var result = await testService.TestExchange();
+        logger.LogInformation("finishing free method");
+        return Ok(result);
     }
 
-    [HttpGet("free/error")]
+    [HttpGet("free/random-error")]
     [AllowAnonymous]
-    public IActionResult FreeError()
+    public IActionResult RandomError()
     {
-        _logger.LogInformation("starting free method");
-        _logger.LogError("error while trying to resolve free method");
-        throw new Exception("error while trying to resolve free method");
+        logger.LogInformation("starting random error method");
+        throw new ArgumentException("error while trying to resolve random error method");
+    }
+
+    [HttpGet("free/notification-error")]
+    [AllowAnonymous]
+    public IActionResult NotificationError()
+    {
+        logger.LogInformation("starting notification error method");
+        notification.AddNotification("error while trying to resolve notification error method");
+        throw new NotificationException();
     }
 }

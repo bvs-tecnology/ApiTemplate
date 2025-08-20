@@ -397,3 +397,7 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# SonarQube/SonarLint temporary files
+.sonarlint/
+.sonarqube/

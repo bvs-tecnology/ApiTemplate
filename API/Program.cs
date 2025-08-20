@@ -1,7 +1,7 @@
+using API.Configurators;
 using API.Middlewares;
 using HealthChecks.UI.Client;
 using Infra.IoC;
-using Infra.Security;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,11 +11,9 @@ builder.Services.AddOpenApi();
 
 #region Injections
 builder.Services
-    .AddOpenTemeletryConfiguration(builder.Configuration)
-    .AddLocalServices(builder.Configuration)
-    .AddLocalHttpClients(builder.Configuration)
-    .AddLocalUnitOfWork(builder.Configuration)
-    .AddLocalCache(builder.Configuration)
+    .AddOpenTelemetryConfiguration(builder.Configuration)
+    .InjectDependencies(builder.Configuration)
+    .AddLocalMassTransit(builder.Configuration)
     .AddLocalHealthChecks(builder.Configuration)
     .AddKeycloakAuthentication(builder.Configuration)
     .AddLocalCors()
@@ -27,7 +25,9 @@ builder.Logging
 var app = builder.Build();
 
 #region Middlewares
-app.UseMiddleware<ControllerMiddleware>();
+app.UseMiddleware<TraceMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<ActivityStatusMiddleware>();
 app.UseHttpsRedirection();
 app.UseLocalCors(builder.Environment);
 app.UseAuthentication();
@@ -38,5 +38,5 @@ app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIRespon
 app.MapControllers();
 #endregion
 
-app.Run();
+await app.RunAsync();
 
