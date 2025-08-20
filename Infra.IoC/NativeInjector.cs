@@ -16,7 +16,7 @@ public static class NativeInjector
     {
         services
             .InjectData(configuration)
-            .InjectHttp(configuration)
+            .InjectHttp()
             .InjectApplication();
         
         services.AddScoped<INotification, Notification>();
