@@ -11,16 +11,16 @@ namespace Infra.Data.Repositories
         private readonly DbSet<T> _dbSet = unitOfWork.GetContext().Set<T>();
         public IQueryable<T> GetAll() => _dbSet.AsQueryable();
         public IQueryable<T> Get(Expression<Func<T, bool>> predicate) => _dbSet.Where(predicate).AsQueryable();
-        public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> predicate) => await Get(predicate).ToListAsync();
+        public Task<List<T>> GetAsync(Expression<Func<T, bool>> predicate) => Get(predicate).ToListAsync();
         public async Task<T> GetAsync(Guid id)
         {
             var entity = await _dbSet.FindAsync(id);
             if (entity == null) throw new ArgumentException("Entity not found");
             return entity;
         }
-        public async Task<IEnumerable<T>> GetNoTrackingAsync(Expression<Func<T, bool>> predicate) => await Get(predicate).AsNoTracking().ToListAsync();
-        public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate) => await _dbSet.AnyAsync(predicate);
-        public async Task SaveChangesAsync() => await unitOfWork.GetContext().SaveChangesAsync();
+        public Task<List<T>> GetNoTrackingAsync(Expression<Func<T, bool>> predicate) => Get(predicate).AsNoTracking().ToListAsync();
+        public Task<bool> AnyAsync(Expression<Func<T, bool>> predicate) => _dbSet.AnyAsync(predicate);
+        public Task SaveChangesAsync() => unitOfWork.GetContext().SaveChangesAsync();
         public async Task<T> InsertAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
