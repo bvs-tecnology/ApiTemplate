@@ -2,9 +2,9 @@
 using System.Text.Json;
 using API.Middlewares;
 using Domain.Common;
+using Domain.Common.Constants;
 using Domain.Exceptions;
 using Domain.SeedWork.Notification;
-using Infra.Utils.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;

@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Domain.Common;
 using Domain.SeedWork.Notification;
-using Infra.Utils.Constants;
 using System.Text.Json;
 using Domain.Common.Constants;
 using Domain.Exceptions;
