@@ -8,6 +8,7 @@ using Infra.Utils.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Tests.Middlewares;
@@ -15,10 +16,11 @@ namespace Tests.Middlewares;
 public class ExceptionMiddlewareTests
 {
     private readonly Mock<IHostEnvironment> _mockEnvironment = new();
+    private readonly Mock<ILogger<ExceptionMiddleware>> _mockLogger = new();
     private ExceptionMiddleware CreateMiddleware(RequestDelegate next)
     {
         IOptions<JsonOptions> options = Options.Create(new JsonOptions());
-        return new ExceptionMiddleware(next, options, _mockEnvironment.Object);
+        return new ExceptionMiddleware(next, options, _mockEnvironment.Object, _mockLogger.Object);
     }
 
     [Fact]

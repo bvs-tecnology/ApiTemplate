@@ -1,4 +1,6 @@
-﻿using Domain.Interfaces.Services;
+﻿using Domain.Exceptions;
+using Domain.Interfaces.Services;
+using Domain.SeedWork.Notification;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,7 +8,8 @@ namespace API.Controllers;
 
 public class TestController(
     ILogger<TestController> logger,
-    ITestService testService
+    ITestService testService,
+    INotification notification
 ) : BaseController
 {
     [HttpGet("token")]
@@ -32,12 +35,20 @@ public class TestController(
         return Ok(result);
     }
 
-    [HttpGet("free/error")]
+    [HttpGet("free/random-error")]
     [AllowAnonymous]
-    public IActionResult FreeError()
+    public IActionResult RandomError()
     {
-        logger.LogInformation("starting free method");
-        logger.LogError("error while trying to resolve free method");
-        throw new Exception("error while trying to resolve free method");
+        logger.LogInformation("starting random error method");
+        throw new ArgumentException("error while trying to resolve random error method");
+    }
+
+    [HttpGet("free/notification-error")]
+    [AllowAnonymous]
+    public IActionResult NotificationError()
+    {
+        logger.LogInformation("starting notification error method");
+        notification.AddNotification("error while trying to resolve notification error method");
+        throw new NotificationException();
     }
 }
