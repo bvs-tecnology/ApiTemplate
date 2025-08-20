@@ -3,6 +3,7 @@ using Domain.Common;
 using Domain.SeedWork.Notification;
 using Infra.Utils.Constants;
 using System.Text.Json;
+using Domain.Common.Constants;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -12,7 +13,8 @@ namespace API.Middlewares
     public class ExceptionMiddleware(
         RequestDelegate next,
         IOptions<JsonOptions> options,
-        IHostEnvironment environment
+        IHostEnvironment environment,
+        ILogger<ExceptionMiddleware> logger
     )
     {
         private readonly JsonSerializerOptions _jsonOptions = options.Value.JsonSerializerOptions;
@@ -22,12 +24,14 @@ namespace API.Middlewares
             {
                 await next(context);
             }
-            catch (NotificationException)
+            catch (NotificationException ex)
             {
+                logger.LogWarning(ex, "{Message} | Path: {Path}", ExceptionMessage.MappedException, context.Request.Path);
                 await HandleExceptionAsync(context, notification);
             }
             catch (Exception ex)
             {
+                logger.LogError(ex, "{Message} | Path: {Path}", ExceptionMessage.UnexpectedException, context.Request.Path);
                 await HandleExceptionAsync(context, ex);
             }
         }

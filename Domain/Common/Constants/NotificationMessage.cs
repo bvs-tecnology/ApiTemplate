@@ -1,6 +1,6 @@
-﻿namespace Domain.SeedWork.Constants
+﻿namespace Domain.Common.Constants
 {
-    public static class NotificationConstant
+    public static class NotificationMessage
     {
         public const string InvalidPropertyKey = "Invalid property";
     }
