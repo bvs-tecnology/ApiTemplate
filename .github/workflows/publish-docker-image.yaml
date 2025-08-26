@@ -10,7 +10,6 @@ jobs:
   build_and_publish:
     runs-on:
       - self-hosted
-      - windows
     environment: ${{ github.base_ref == 'main' && 'PRD' || 'DEV' }}
 
     steps:
