@@ -17,25 +17,31 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with: 
-          java-version: '17'
-          distribution: 'temurin'
-          
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          args: >
-            -Dsonar.projectKey=${{ vars.SONAR_API_KEY }}
-            -Dsonar.projectName=${{ vars.SONAR_API_KEY }}
-            -Dsonar.sources=.
-            -Dsonar.language=cs
-            -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.cs.vscoveragexml.reportsPaths="coverage.xml"
+          dotnet-version: '9.0.x'
+          
+      - name: Setup SonarScanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Setup .NET Coverage
+        run: dotnet tool install --global dotnet-coverage
+        
+      - name: Add .NET Tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+        
+      - name: SonarQube Scan
+        shell: bash
+        run: |
+          dotnet sonarscanner begin \
+            /k:"${{ vars.SONAR_API_KEY }}" \
+            /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}" \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.cs.vscoveragexml.reportsPaths="coverage.xml"
+          dotnet build --no-incremental
+          dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
+          dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
       - name: SonarQube Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@v1
