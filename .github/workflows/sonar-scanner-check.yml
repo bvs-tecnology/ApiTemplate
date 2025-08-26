@@ -37,10 +37,10 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@master
         with:
           args: >
-            /k:"${{ vars.SONAR_API_KEY }}"
-            /d:sonar.host.url="${{ vars.SONAR_HOST_URL }}"
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-            /d:sonar.cs.vscoveragexml.reportsPaths="coverage.xml"
+            -Dsonar.projectKey:"${{ vars.SONAR_API_KEY }}"
+            -Dsonar.host.url="${{ vars.SONAR_HOST_URL }}"
+            -Dsonar.token="${{ secrets.SONAR_TOKEN }}"
+            -Dsonar.cs.vscoveragexml.reportsPaths="coverage.xml"
 
       - name: SonarQube Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@v1
