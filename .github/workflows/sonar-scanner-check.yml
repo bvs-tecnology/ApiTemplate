@@ -21,6 +21,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
+          installation-path: $HOME/dotnet
           
       - name: Setup SonarScanner
         run: dotnet tool install --global dotnet-sonarscanner
@@ -29,7 +30,7 @@ jobs:
         run: dotnet tool install --global dotnet-coverage
         
       - name: Add .NET Tools to PATH
-        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+        run: echo "$HOME/.dotnet" >> $GITHUB_PATH
         
       - name: SonarQube Scan
         shell: bash
