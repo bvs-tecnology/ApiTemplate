@@ -31,6 +31,10 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=${{ vars.SONAR_API_KEY }}
+            -Dsonar.projectName=${{ vars.SONAR_API_KEY }}
+            -Dsonar.sources=.
+            -Dsonar.language=cs
+            -Dsonar.sourceEncoding=UTF-8
 
       - name: SonarQube Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@v1
