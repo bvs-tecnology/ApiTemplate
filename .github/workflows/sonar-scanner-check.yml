@@ -28,12 +28,14 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_API_KEY: ${{ vars.SONAR_API_KEY }}
 
       - name: SonarQube Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_API_KEY: ${{ vars.SONAR_API_KEY }}
 
 #      - name: Setup .NET
 #        uses: actions/setup-dotnet@v4
