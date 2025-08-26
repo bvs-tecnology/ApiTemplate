@@ -24,18 +24,22 @@ jobs:
           distribution: 'temurin'
           
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@master
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
-          SONAR_API_KEY: ${{ vars.SONAR_API_KEY }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ vars.SONAR_API_KEY }}
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: SonarQube Quality Gate Check
-        uses: SonarSource/sonarqube-quality-gate-action@master
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
-          SONAR_API_KEY: ${{ vars.SONAR_API_KEY }}
 
 #      - name: Setup .NET
 #        uses: actions/setup-dotnet@v4
