@@ -24,8 +24,9 @@ jobs:
           
       - name: Install dotnet-coverage
         run: dotnet tool install --global dotnet-coverage
-        env:
-          PATH: ${{ runner.tool_cache }}/dotnet/tools:$PATH
+
+      - name: Add .NET tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Build & Test with Coverage
         run: |
