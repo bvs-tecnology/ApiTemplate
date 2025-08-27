@@ -1,4 +1,6 @@
-﻿using Domain.Exceptions;
+﻿using Domain.Common;
+using Domain.Entities.Dtos;
+using Domain.Exceptions;
 using Domain.Interfaces.Services;
 using Domain.SeedWork.Notification;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +15,8 @@ public class TestController(
 ) : BaseController
 {
     [HttpGet("token")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public IActionResult Token()
     {
         return Ok();
@@ -20,6 +24,9 @@ public class TestController(
     
     [HttpGet("authorize")]
     [Authorize(Roles = "admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public IActionResult Authorize()
     {
         return Ok();
@@ -27,6 +34,7 @@ public class TestController(
 
     [HttpGet("free")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(TestConsumerDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Free()
     {
         logger.LogInformation("starting free method");
@@ -37,6 +45,7 @@ public class TestController(
 
     [HttpGet("free/random-error")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public IActionResult RandomError()
     {
         logger.LogInformation("starting random error method");
@@ -45,6 +54,7 @@ public class TestController(
 
     [HttpGet("free/notification-error")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public IActionResult NotificationError()
     {
         logger.LogInformation("starting notification error method");

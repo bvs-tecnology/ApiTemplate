@@ -7,20 +7,24 @@ namespace API.Configurators;
 [ExcludeFromCodeCoverage]
 public static class KeycloakConfigurator
 {
-    public static IServiceCollection AddKeycloakAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddKeycloakConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
+        var keycloak = configuration.GetSection("Keycloak").Get<Keycloak>();
+        if (keycloak == null) throw new ArgumentException("Authorization not provided");
         services.Configure<Keycloak>(configuration.GetSection("Keycloak"));
+        
         services.AddAuthentication("Bearer")
             .AddJwtBearer("Bearer", options =>
             {
-                options.Authority = configuration["Keycloak:Issuer"];
+                options.Authority = keycloak.Issuer;
+                options.Audience = keycloak.Audience;
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = true,
-                    ValidAudience = configuration["Keycloak:Audience"],
+                    ValidAudience = keycloak.Audience,
                     ValidateIssuer = true,
-                    ValidIssuer = configuration["Keycloak:Issuer"],
+                    ValidIssuer = keycloak.Issuer,
                     NameClaimType = "preferred_username",
                     RoleClaimType = ClaimTypes.Role
                 };

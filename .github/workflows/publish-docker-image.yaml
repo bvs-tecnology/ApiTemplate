@@ -10,12 +10,14 @@ jobs:
   build_and_publish:
     runs-on:
       - self-hosted
-      - windows
     environment: ${{ github.base_ref == 'main' && 'PRD' || 'DEV' }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
 
