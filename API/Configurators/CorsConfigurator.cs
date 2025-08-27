@@ -4,7 +4,7 @@ namespace API.Configurators;
 [ExcludeFromCodeCoverage]
 public static class CorsConfigurator
 {
-    public static IServiceCollection AddLocalCors(this IServiceCollection services)
+    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services)
     {
         services.AddCors(options =>
         {
