@@ -6,7 +6,7 @@ namespace API.Configurators;
 [ExcludeFromCodeCoverage]
 public static class OpenApiConfigurator
 {
-    public static IServiceCollection AddLocalOpenApi(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOpenApiConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         var keycloak = configuration.GetSection("Keycloak").Get<Keycloak>();
         if (keycloak == null) throw new ArgumentException("Authorization not provided");

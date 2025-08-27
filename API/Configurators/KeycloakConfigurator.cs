@@ -7,7 +7,7 @@ namespace API.Configurators;
 [ExcludeFromCodeCoverage]
 public static class KeycloakConfigurator
 {
-    public static IServiceCollection AddKeycloakAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddKeycloakConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         var keycloak = configuration.GetSection("Keycloak").Get<Keycloak>();
         if (keycloak == null) throw new ArgumentException("Authorization not provided");

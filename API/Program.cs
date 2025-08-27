@@ -7,18 +7,17 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
 
 #region Injections
-
+builder.Services.AddControllers();
 builder.Services
-    .AddLocalOpenApi(builder.Configuration)
+    .AddOpenApiConfiguration(builder.Configuration)
     .AddOpenTelemetryConfiguration(builder.Configuration)
     .InjectDependencies(builder.Configuration)
-    .AddLocalMassTransit(builder.Configuration)
-    .AddLocalHealthChecks(builder.Configuration)
-    .AddKeycloakAuthentication(builder.Configuration)
-    .AddLocalCors()
+    .AddMassTransitConfiguration(builder.Configuration)
+    .AddHealthChecksConfiguration(builder.Configuration)
+    .AddKeycloakConfiguration(builder.Configuration)
+    .AddCorsConfiguration()
     .AddOptions();
 builder.Logging
     .AddOpenTelemetryConfiguration(builder.Configuration);

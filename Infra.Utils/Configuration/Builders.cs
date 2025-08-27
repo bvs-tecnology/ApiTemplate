@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Domain.Exceptions;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using StackExchange.Redis;
@@ -15,7 +14,7 @@ namespace Infra.Utils.Configuration
             var configurationConnectionString = configuration.GetConnectionString("Postgres");
             
             if (string.IsNullOrWhiteSpace(environmentConnectionString) && string.IsNullOrWhiteSpace(configurationConnectionString))
-                throw new StartupException("Postgres connection string not defined");
+                throw new ArgumentException("Postgres connection string not defined");
             
             var connBuilder = new NpgsqlConnectionStringBuilder(environmentConnectionString ?? configurationConnectionString)
             {
@@ -33,7 +32,7 @@ namespace Infra.Utils.Configuration
             var configurationConnectionString = configuration.GetConnectionString("Redis");
             
             if (string.IsNullOrWhiteSpace(environmentConnectionString) && string.IsNullOrWhiteSpace(configurationConnectionString))
-                throw new StartupException("Redis connection string not defined");
+                throw new ArgumentException("Redis connection string not defined");
 
             var redisOptions = ConfigurationOptions.Parse(environmentConnectionString ?? configurationConnectionString!);
 
@@ -52,7 +51,7 @@ namespace Infra.Utils.Configuration
             var configurationConnectionString = configuration.GetConnectionString("RabbitMQ");
             
             if (string.IsNullOrWhiteSpace(environmentConnectionString) && string.IsNullOrWhiteSpace(configurationConnectionString))
-                throw new StartupException("RabbitMQ connection string not defined");
+                throw new ArgumentException("RabbitMQ connection string not defined");
             
             return environmentConnectionString ?? configurationConnectionString!;
         }

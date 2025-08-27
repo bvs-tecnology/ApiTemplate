@@ -6,7 +6,7 @@ namespace API.Configurators;
 [ExcludeFromCodeCoverage]
 public static class MassTransitConfigurator
 {
-    public static IServiceCollection AddLocalMassTransit(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddMassTransitConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMassTransit(busConfigurator =>
         {
