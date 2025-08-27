@@ -8,12 +8,6 @@
     <UserSecretsId>b562db8b-a254-4c99-a55d-d7f2d45a4677</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <SonarQubeSetting Include="sonar.coverage.exclusions">
-      <Value>**/Program.cs</Value>
-    </SonarQubeSetting>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />

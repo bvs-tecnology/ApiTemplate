@@ -45,6 +45,7 @@ jobs:
             -Dsonar.sources=.
             -Dsonar.language=cs
             -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.coverage.exclusions=**\Program.cs
             -Dsonar.cs.vscoveragexml.reportsPaths="coverage.xml"
 
       - name: SonarQube Quality Gate Check
