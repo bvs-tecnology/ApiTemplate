@@ -1,8 +1,9 @@
-﻿using Infra.Utils.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using Infra.Utils.Configuration;
 using Microsoft.OpenApi.Models;
 
 namespace API.Configurators;
-
+[ExcludeFromCodeCoverage]
 public static class OpenApiConfigurator
 {
     public static IServiceCollection AddLocalOpenApi(this IServiceCollection services, IConfiguration configuration)
