@@ -3,7 +3,7 @@
     "run Development": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "openapi/v1.json",
+      "launchUrl": "scalar/v1",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

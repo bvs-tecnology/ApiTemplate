@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Infra.Utils.Configuration;
 using MassTransit;
 
 namespace API.Configurators;
@@ -12,11 +13,7 @@ public static class MassTransitConfigurator
             busConfigurator.SetKebabCaseEndpointNameFormatter();
             busConfigurator.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host(new Uri(configuration["MessageBroker:Host"]!), h =>
-                {
-                    h.Username(configuration["MessageBroker:Username"]!);
-                    h.Password(configuration["MessageBroker:Password"]!);
-                });
+                cfg.Host(new Uri(Builders.BuildRabbitMQConnectionString(configuration)));
                 cfg.UseInstrumentation();
                 cfg.ConfigureEndpoints(context);
             });
