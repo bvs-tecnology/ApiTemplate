@@ -3,8 +3,8 @@ name: SonarQube scan check
 on:
   pull_request:
     branches:
-      - development
       - main
+      - development
 
 jobs:  
   sonar:

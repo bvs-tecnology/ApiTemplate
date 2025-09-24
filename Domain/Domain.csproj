@@ -7,8 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Common\InputModel\" />
-    <Folder Include="Entities\Enums\" />
     <Folder Include="Entities\Primitives\" />
   </ItemGroup>
 

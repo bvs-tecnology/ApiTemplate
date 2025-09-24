@@ -8,7 +8,7 @@ public static class OpenApiConfigurator
 {
     public static IServiceCollection AddOpenApiConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        var keycloak = configuration.GetSection("Keycloak").Get<Keycloak>();
+        var keycloak = configuration.GetSection("Keycloak").Get<KeycloakConfigs>();
         if (keycloak == null) throw new ArgumentException("Authorization not provided");
         
         services.AddOpenApi(options =>

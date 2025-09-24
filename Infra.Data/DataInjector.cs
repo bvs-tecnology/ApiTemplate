@@ -22,8 +22,14 @@ public static class DataInjector
     
     private static IServiceCollection InjectUnitOfWork(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<Context.Context>(options => 
-            options.UseLazyLoadingProxies().UseNpgsql(Builders.BuildPostgresConnectionString(configuration)));
+        services.AddDbContext<CustomDbContext>(options => 
+            options
+                .UseLazyLoadingProxies()
+                .UseNpgsql(
+                    Builders.BuildPostgresConnectionString(configuration),
+                    o => o.MigrationsHistoryTable("migrations_history", "template_api")
+                )
+        );
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }
@@ -35,7 +41,7 @@ public static class DataInjector
     
     private static IServiceCollection InjectRepositories(this IServiceCollection services)
     {
-        services.AddScoped<ITestRepository, TestRepository>();
+        services.AddScoped<IPushSubscriptionRepository, PushSubscriptionRepository>();
         return services;
     }
 }

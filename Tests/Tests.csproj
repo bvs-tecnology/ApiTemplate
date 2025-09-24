@@ -39,6 +39,8 @@
 
     <ItemGroup>
       <Folder Include="Controllers\" />
+      <Folder Include="Entities\Dtos\" />
+      <Folder Include="Mocks\Entities\Dtos\" />
     </ItemGroup>
 
 </Project>
