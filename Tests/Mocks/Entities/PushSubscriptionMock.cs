@@ -5,7 +5,7 @@ namespace Tests.Mocks.Entities;
 
 public class PushSubscriptionMock : BaseMock<PushSubscription>
 {
-    protected override PushSubscription GetEntity(Guid id)
+    public override PushSubscription GetEntity(Guid id)
     {
         var inputModel = new PushSubscriptionInputModel
         {
