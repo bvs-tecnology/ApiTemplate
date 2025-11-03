@@ -2,18 +2,18 @@
 
 namespace Infra.Data.Context;
 [ExcludeFromCodeCoverage]
-public class UnitOfWork(Context context) : IUnitOfWork, IDisposable
+public class UnitOfWork(CustomDbContext customDbContext) : IUnitOfWork, IDisposable
 {
-    public Context Context { get; } = context;
+    public CustomDbContext CustomDbContext { get; } = customDbContext;
 
-    public Context GetContext() => Context;
+    public CustomDbContext GetContext() => CustomDbContext;
     public void SaveChanges()
     {
-        Context.SaveChanges();
+        CustomDbContext.SaveChanges();
     }
     public async Task SaveChangesAsync()
     {
-        await Context.SaveChangesAsync();
+        await CustomDbContext.SaveChangesAsync();
     }
 
     private bool _disposed = false;
@@ -22,7 +22,7 @@ public class UnitOfWork(Context context) : IUnitOfWork, IDisposable
     {
         if (!this._disposed && disposing)
         {
-            Context.Dispose();
+            CustomDbContext.Dispose();
         }
         this._disposed = true;
     }

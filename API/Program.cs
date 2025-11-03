@@ -2,17 +2,21 @@ using API.Configurators;
 using API.Middlewares;
 using HealthChecks.UI.Client;
 using Infra.IoC;
+using Infra.Utils.Configuration;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#region Configs
+builder.Services.Configure<PushNotificationConfigs>(builder.Configuration.GetSection("PushNotification"));
+#endregion
 
 #region Injections
 builder.Services.AddControllers();
 builder.Services
-    .AddOpenApiConfiguration(builder.Configuration)
     .AddOpenTelemetryConfiguration(builder.Configuration)
+    .AddOpenApiConfiguration(builder.Configuration)
     .InjectDependencies(builder.Configuration)
     .AddMassTransitConfiguration(builder.Configuration)
     .AddHealthChecksConfiguration(builder.Configuration)

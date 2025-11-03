@@ -9,9 +9,9 @@ public static class KeycloakConfigurator
 {
     public static IServiceCollection AddKeycloakConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        var keycloak = configuration.GetSection("Keycloak").Get<Keycloak>();
+        var keycloak = configuration.GetSection("Keycloak").Get<KeycloakConfigs>();
         if (keycloak == null) throw new ArgumentException("Authorization not provided");
-        services.Configure<Keycloak>(configuration.GetSection("Keycloak"));
+        services.Configure<KeycloakConfigs>(configuration.GetSection("Keycloak"));
         
         services.AddAuthentication("Bearer")
             .AddJwtBearer("Bearer", options =>
