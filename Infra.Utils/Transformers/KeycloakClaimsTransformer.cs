@@ -6,9 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace Infra.Utils.Transformers;
 
-public class KeycloakClaimsTransformer(IOptionsSnapshot<Keycloak> keycloak) : IClaimsTransformation
+public class KeycloakClaimsTransformer(IOptionsSnapshot<KeycloakConfigs> keycloak) : IClaimsTransformation
 {
-    private readonly Keycloak _keycloak = keycloak.Value;
+    private readonly KeycloakConfigs _keycloakConfigs = keycloak.Value;
 
     public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
@@ -23,8 +23,8 @@ public class KeycloakClaimsTransformer(IOptionsSnapshot<Keycloak> keycloak) : IC
         
         var parsed = JsonDocument.Parse(resourceAccess.Value);
 
-        if (string.IsNullOrEmpty(_keycloak.ClientId) ||
-            !parsed.RootElement.TryGetProperty(_keycloak.ClientId, out var clientResources) ||
+        if (string.IsNullOrEmpty(_keycloakConfigs.ClientId) ||
+            !parsed.RootElement.TryGetProperty(_keycloakConfigs.ClientId, out var clientResources) ||
             !clientResources.TryGetProperty("roles", out var clientRoles))
         {
             return Task.FromResult(principal);

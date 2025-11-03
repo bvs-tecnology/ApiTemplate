@@ -16,7 +16,7 @@ public static class ApplicationInjector
     
     private static IServiceCollection InjectServices(this IServiceCollection services)
     {
-        services.AddScoped<ITestService, TestService>();
+        services.AddScoped<IPushService, PushService>();
         
         return services;
     }

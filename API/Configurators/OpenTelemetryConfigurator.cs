@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Npgsql;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -25,16 +26,26 @@ public static class OpenTelemetryConfigurator
                     .AddMassTransitInstrumentation()
                     .AddSource("MassTransit")
                     .AddNpgsql()
-                    .AddOtlpExporter(opt => opt.Endpoint = new Uri(otelUri));
+                    .AddOtlpExporter(opt =>
+                    {
+                        opt.Endpoint = new Uri(otelUri); 
+                        opt.Protocol = OtlpExportProtocol.Grpc;
+                    });
             })
             .WithMetrics(metricsBuilder =>
             {
                 metricsBuilder
+                    .SetResourceBuilder(resourceBuilder)
+                    .AddMeter(apiName)
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
-                    .SetResourceBuilder(resourceBuilder)
-                    .AddOtlpExporter(opt => opt.Endpoint = new Uri(otelUri));
+                    .AddProcessInstrumentation()
+                    .AddOtlpExporter(opt =>
+                    {
+                        opt.Endpoint = new Uri(otelUri);
+                        opt.Protocol = OtlpExportProtocol.Grpc;
+                    });
             });
         
         return services;
@@ -50,7 +61,11 @@ public static class OpenTelemetryConfigurator
             loggingBuilder.IncludeFormattedMessage = true;
             loggingBuilder.SetResourceBuilder(resourceBuilder)
                 .AttachLogsToActivityEvent()
-                .AddOtlpExporter(opt => opt.Endpoint = new Uri(otelUri));
+                .AddOtlpExporter(opt =>
+                {
+                    opt.Endpoint = new Uri(otelUri);
+                    opt.Protocol = OtlpExportProtocol.Grpc;
+                });
         });
         return logging;
     }

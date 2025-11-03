@@ -11,12 +11,9 @@ public abstract class BaseRepository<T>(IUnitOfWork unitOfWork) : IBaseRepositor
     public IQueryable<T> GetAll() => _dbSet.AsQueryable();
     public IQueryable<T> Get(Expression<Func<T, bool>> predicate) => _dbSet.Where(predicate).AsQueryable();
     public Task<List<T>> GetAsync(Expression<Func<T, bool>> predicate) => Get(predicate).ToListAsync();
-    public async Task<T> GetAsync(Guid id)
-    {
-        var entity = await _dbSet.FindAsync(id);
-        if (entity == null) throw new ArgumentException("Entity not found");
-        return entity;
-    }
+    public async Task<T?> FindAsync(Guid id) => await _dbSet.FindAsync(id);
+    public Task<T?> FindAsync(Expression<Func<T, bool>> predicate) => _dbSet.FirstOrDefaultAsync(predicate);
+
     public Task<List<T>> GetNoTrackingAsync(Expression<Func<T, bool>> predicate) => Get(predicate).AsNoTracking().ToListAsync();
     public Task<bool> AnyAsync(Expression<Func<T, bool>> predicate) => _dbSet.AnyAsync(predicate);
     public Task SaveChangesAsync() => unitOfWork.GetContext().SaveChangesAsync();
@@ -39,4 +36,5 @@ public abstract class BaseRepository<T>(IUnitOfWork unitOfWork) : IBaseRepositor
         _dbSet.Remove(entity);
         await SaveChangesAsync();
     }
+    public Task<List<T>> GetByCreator(Guid userId) => GetAsync(x => x.CreatedBy == userId);
 }

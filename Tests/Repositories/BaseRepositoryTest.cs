@@ -17,10 +17,10 @@ public abstract class BaseRepositoryTest<TRepository, TMock, T>
 
     protected BaseRepositoryTest()
     {
-        var options = new DbContextOptionsBuilder<Context>()
+        var options = new DbContextOptionsBuilder<CustomDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
-        var context = new Context(options);
+        var context = new CustomDbContext(options);
         context.Set<T>().AddRange(_mock.GetEnumerable(3));
         context.SaveChanges();
         _unitOfWork.Setup(x => x.GetContext()).Returns(context);
@@ -59,20 +59,37 @@ public abstract class BaseRepositoryTest<TRepository, TMock, T>
     }
 
     [Fact]
-    public async Task ShouldGetByIdAsync()
+    public async Task ShouldFindByIdAsync()
     {
         var firstEntity = await _repository.GetAll().FirstOrDefaultAsync();
-        var entity = await _repository.GetAsync(firstEntity!.Id);
+        var entity = await _repository.FindAsync(firstEntity!.Id);
 
         Assert.NotNull(entity);
-        Assert.Equal(firstEntity.Id, entity.Id);
+        Assert.Equal(firstEntity!.Id, entity.Id);
     }
 
     [Fact]
-    public async Task ShouldThrowOnGetByInvalidId()
+    public async Task ShouldGetNullOnFindById()
     {
-        await Assert.ThrowsAsync<ArgumentException>(async () =>
-            await _repository.GetAsync(Guid.NewGuid()));
+        var entity = await _repository.FindAsync(Guid.NewGuid());
+        Assert.Null(entity);
+    }
+
+    [Fact]
+    public async Task ShouldFindByPredicateAsync()
+    {
+        var firstEntity = await _repository.GetAll().FirstOrDefaultAsync();
+        var entity = await _repository.FindAsync(x => x.Id == firstEntity!.Id);
+
+        Assert.NotNull(entity);
+        Assert.Equal(firstEntity!.Id, entity.Id);
+    }
+
+    [Fact]
+    public async Task ShouldThrowOnFindByInvalidPredicate()
+    {
+        var entity = await _repository.FindAsync(x => x.Id == Guid.NewGuid());
+        Assert.Null(entity);
     }
 
     [Fact]
@@ -127,5 +144,24 @@ public abstract class BaseRepositoryTest<TRepository, TMock, T>
         var all = await _repository.GetAll().ToListAsync();
         Assert.Equal(2, all.Count);
         Assert.DoesNotContain(all, e => e.Id == entity!.Id);
+    }
+
+    [Fact]
+    public async Task ShouldGetByCustomer()
+    {
+        var entity = await _repository.GetAll().FirstOrDefaultAsync();
+        var result = await _repository.GetByCreator(entity!.CreatedBy!.Value);
+        
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
+
+    [Fact]
+    public async Task ShouldGetByCustomerEmptyList()
+    {
+        var result = await _repository.GetByCreator(Guid.NewGuid());
+        
+        Assert.NotNull(result);
+        Assert.Empty(result);
     }
 }
